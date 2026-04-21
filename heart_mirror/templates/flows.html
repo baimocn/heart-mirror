@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>善款流向公示 - 心镜</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .flows-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .flow-item {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .flow-item:hover {
+            background: #f8fafc;
+        }
+
+        .flow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .flow-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #1e293b;
+        }
+
+        .flow-amount {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #10b981;
+        }
+
+        .flow-meta {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .flow-description {
+            margin-bottom: 15px;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #334155;
+        }
+
+        .flow-images {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .flow-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-top: 30px;
+        }
+
+        .back-btn:hover {
+            background: #334155;
+            transform: translateY(-2px);
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .flows-container {
+                padding: 20px;
+            }
+
+            .flow-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .flow-meta {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .flow-image {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 善款流向公示</h1>
+            <p class="subtitle">透明公开，每一分善款都有迹可循</p>
+        </header>
+
+        <div class="flows-container" id="flowsContainer">
+            <!-- 善款流向记录将通过JavaScript动态生成 -->
+        </div>
+
+        <a href="/" class="back-btn">返回首页</a>
+    </div>
+
+    <script>
+        // 加载善款流向记录
+        async function loadFlows() {
+            try {
+                const response = await fetch('/api/flows');
+                const flows = await response.json();
+                renderFlows(flows);
+            } catch (error) {
+                console.error('加载善款流向记录失败', error);
+                document.getElementById('flowsContainer').innerHTML = '<div class="empty-message">加载失败，请稍后重试</div>';
+            }
+        }
+
+        // 渲染善款流向记录
+        function renderFlows(flows) {
+            const container = document.getElementById('flowsContainer');
+            
+            if (flows.length === 0) {
+                container.innerHTML = '<div class="empty-message">暂无善款流向记录</div>';
+                return;
+            }
+
+            let html = '';
+            flows.forEach(flow => {
+                let imagesHtml = '';
+                if (flow.images && flow.images.length > 0) {
+                    flow.images.forEach(image => {
+                        imagesHtml += `<img src="${image}" class="flow-image" alt="凭证图片">`;
+                    });
+                }
+
+                html += `
+                    <div class="flow-item">
+                        <div class="flow-header">
+                            <div class="flow-title">${flow.purpose}</div>
+                            <div class="flow-amount">¥${flow.amount.toFixed(2)}</div>
+                        </div>
+                        <div class="flow-meta">
+                            <span>批次ID: ${flow.batch_id}</span>
+                            <span>日期: ${flow.date}</span>
+                        </div>
+                        <div class="flow-description">${flow.description || '无详细描述'}</div>
+                        ${imagesHtml ? `<div class="flow-images">${imagesHtml}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 初始化
+        loadFlows();
+    </script>
+</body>
+</html>

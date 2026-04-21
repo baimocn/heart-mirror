@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>道德困惑墙 - 心镜</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .dilemma-form {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .dilemma-form h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        .form-group textarea,
+        .form-group input {
+            width: 100%;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+            transition: 0.2s;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .options-container {
+            margin-bottom: 20px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .option-item input {
+            flex: 1;
+        }
+
+        .remove-option {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .remove-option:hover {
+            background: #dc2626;
+        }
+
+        .add-option {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .add-option:hover {
+            background: #059669;
+        }
+
+        .anonymous-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .submit-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .dilemmas-list {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dilemmas-list h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+
+        .dilemma-item {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: 0.2s;
+        }
+
+        .dilemma-item:hover {
+            background: #f8fafc;
+        }
+
+        .dilemma-content {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+
+        .dilemma-options {
+            margin-bottom: 20px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .option.voted {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+        .option-text {
+            flex: 1;
+        }
+
+        .vote-count {
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .dilemma-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .anonymous-tag {
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-top: 30px;
+        }
+
+        .back-btn:hover {
+            background: #334155;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .dilemma-form,
+            .dilemmas-list {
+                padding: 20px;
+            }
+
+            .dilemma-item {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤔 道德困惑墙</h1>
+            <p class="subtitle">匿名分享你的道德困境，看看大家怎么选择</p>
+        </header>
+
+        <!-- 发布道德困惑表单 -->
+        <div class="dilemma-form">
+            <h2>📝 发布你的困惑</h2>
+            <form id="dilemmaForm">
+                <div class="form-group">
+                    <label for="dilemmaContent">请描述你的道德困境</label>
+                    <textarea id="dilemmaContent" placeholder="例如：你发现同事在工作中作弊，你会选择举报还是保持沉默？"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>选项（至少2个）</label>
+                    <div class="options-container" id="optionsContainer">
+                        <div class="option-item">
+                            <input type="text" placeholder="选项1" class="option-input">
+                            <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
+                        </div>
+                        <div class="option-item">
+                            <input type="text" placeholder="选项2" class="option-input">
+                            <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-option" onclick="addOption()">+ 添加选项</button>
+                </div>
+
+                <div class="anonymous-checkbox">
+                    <input type="checkbox" id="anonymousCheck" checked>
+                    <label for="anonymousCheck">匿名发布</label>
+                </div>
+
+                <button type="submit" class="submit-btn">发布困惑</button>
+            </form>
+        </div>
+
+        <!-- 道德困惑列表 -->
+        <div class="dilemmas-list">
+            <h2>💡 大家的困惑</h2>
+            <div id="dilemmasList">
+                <!-- 道德困惑将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <a href="/" class="back-btn">返回首页</a>
+    </div>
+
+    <script>
+        // 设备标识生成
+        function generateDeviceId() {
+            let id = localStorage.getItem('deviceId');
+            if (!id) {
+                id = 'device_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('deviceId', id);
+            }
+            return id;
+        }
+
+        const deviceId = generateDeviceId();
+
+        // 加载道德困惑列表
+        async function loadDilemmas() {
+            try {
+                const response = await fetch('/api/dilemmas');
+                const dilemmas = await response.json();
+                renderDilemmas(dilemmas);
+            } catch (error) {
+                console.error('加载道德困惑失败', error);
+                document.getElementById('dilemmasList').innerHTML = '<div class="empty-message">加载失败，请稍后重试</div>';
+            }
+        }
+
+        // 渲染道德困惑列表
+        function renderDilemmas(dilemmas) {
+            const container = document.getElementById('dilemmasList');
+            
+            if (dilemmas.length === 0) {
+                container.innerHTML = '<div class="empty-message">还没有道德困惑，不如做第一个分享的人</div>';
+                return;
+            }
+
+            let html = '';
+            dilemmas.forEach(dilemma => {
+                let optionsHtml = '';
+                dilemma.options.forEach((option, index) => {
+                    optionsHtml += `
+                        <div class="option" onclick="voteDilemma(${dilemma.id}, ${index})">
+                            <div class="option-text">${option}</div>
+                            <div class="vote-count">${dilemma.votes[index] || 0} 票</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="dilemma-item">
+                        <div class="dilemma-content">${dilemma.content}</div>
+                        <div class="dilemma-options">
+                            ${optionsHtml}
+                        </div>
+                        <div class="dilemma-meta">
+                            <span>${new Date(dilemma.created_at).toLocaleString()}</span>
+                            <span class="anonymous-tag">${dilemma.is_anonymous ? '匿名' : '公开'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 发布道德困惑
+        async function submitDilemma() {
+            const content = document.getElementById('dilemmaContent').value;
+            const optionInputs = document.querySelectorAll('.option-input');
+            const options = Array.from(optionInputs).map(input => input.value.trim()).filter(value => value);
+            const isAnonymous = document.getElementById('anonymousCheck').checked;
+
+            if (!content) {
+                alert('请描述你的道德困境');
+                return;
+            }
+
+            if (options.length < 2) {
+                alert('至少需要2个选项');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/dilemmas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        device_id: deviceId,
+                        content: content,
+                        options: options,
+                        is_anonymous: isAnonymous ? 1 : 0
+                    })
+                });
+
+                const data = await response.json();
+                if (data.message) {
+                    alert(data.message);
+                    // 清空表单
+                    document.getElementById('dilemmaContent').value = '';
+                    document.getElementById('optionsContainer').innerHTML = `
+                        <div class="option-item">
+                            <input type="text" placeholder="选项1" class="option-input">
+                            <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
+                        </div>
+                        <div class="option-item">
+                            <input type="text" placeholder="选项2" class="option-input">
+                            <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
+                        </div>
+                    `;
+                    // 重新加载列表
+                    loadDilemmas();
+                } else {
+                    alert('发布失败: ' + data.error);
+                }
+            } catch (error) {
+                console.error('发布道德困惑失败', error);
+                alert('发布失败，请稍后重试');
+            }
+        }
+
+        // 投票
+        async function voteDilemma(dilemmaId, optionIndex) {
+            // 检查用户是否已经投过票
+            const votedDilemmas = JSON.parse(localStorage.getItem('voted_dilemmas') || '{}');
+            if (votedDilemmas[dilemmaId]) {
+                alert('你已经为这个道德困境投过票了');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/dilemmas/${dilemmaId}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ option_index: optionIndex })
+                });
+
+                const data = await response.json();
+                if (data.message) {
+                    // 记录用户已投票
+                    votedDilemmas[dilemmaId] = true;
+                    localStorage.setItem('voted_dilemmas', JSON.stringify(votedDilemmas));
+                    
+                    // 重新加载列表
+                    loadDilemmas();
+                } else {
+                    alert('投票失败: ' + data.error);
+                }
+            } catch (error) {
+                console.error('投票失败', error);
+                alert('投票失败，请稍后重试');
+            }
+        }
+
+        // 添加选项
+        function addOption() {
+            const container = document.getElementById('optionsContainer');
+            const optionCount = container.children.length + 1;
+            const optionItem = document.createElement('div');
+            optionItem.className = 'option-item';
+            optionItem.innerHTML = `
+                <input type="text" placeholder="选项${optionCount}" class="option-input">
+                <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
+            `;
+            container.appendChild(optionItem);
+        }
+
+        // 删除选项
+        function removeOption(button) {
+            const optionItem = button.closest('.option-item');
+            const container = document.getElementById('optionsContainer');
+            if (container.children.length > 2) {
+                optionItem.remove();
+                // 更新选项编号
+                const optionInputs = document.querySelectorAll('.option-input');
+                optionInputs.forEach((input, index) => {
+                    input.placeholder = `选项${index + 1}`;
+                });
+            } else {
+                alert('至少需要2个选项');
+            }
+        }
+
+        // 提交表单
+        document.getElementById('dilemmaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitDilemma();
+        });
+
+        // 初始化
+        loadDilemmas();
+    </script>
+</body>
+</html>

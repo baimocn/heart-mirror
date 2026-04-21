@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>善款批次管理 - 心镜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, -apple-system, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .back-btn {
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: #334155;
+            transform: translateY(-2px);
+        }
+
+        .action-bar {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .add-btn {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .batches-list {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .batch-item {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .batch-item:hover {
+            background: #f8fafc;
+        }
+
+        .batch-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .batch-info {
+            flex: 1;
+        }
+
+        .batch-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .batch-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .batch-description {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .batch-images {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .batch-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .edit-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edit-btn:hover {
+            background: #2563eb;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .update-amount-btn {
+            background: #f59e0b;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .update-amount-btn:hover {
+            background: #d97706;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .close:hover {
+            color: #1e293b;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .image-upload {
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .image-upload input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-btn:hover {
+            background: #2563eb;
+        }
+
+        .preview-images {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preview-image {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .preview-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .cancel-btn {
+            background: #64748b;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cancel-btn:hover {
+            background: #475569;
+        }
+
+        .save-btn {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .save-btn:hover {
+            background: #059669;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .batch-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .batch-meta {
+                flex-wrap: wrap;
+            }
+
+            .action-buttons {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📦 善款批次管理</h1>
+            <a href="/admin?password=admin123" class="back-btn">返回管理面板</a>
+        </header>
+
+        <div class="action-bar">
+            <button class="add-btn" onclick="openAddModal()">+ 添加善款批次</button>
+        </div>
+
+        <div class="batches-list" id="batchesList">
+            <!-- 善款批次列表将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 添加/编辑善款批次模态框 -->
+    <div id="batchModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">添加善款批次</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="batchForm">
+                <input type="hidden" id="batchId">
+                
+                <div class="form-group">
+                    <label for="batchIdInput">批次ID</label>
+                    <input type="text" id="batchIdInput" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="batchName">批次名称</label>
+                    <input type="text" id="batchName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="batchStartDate">开始日期</label>
+                    <input type="date" id="batchStartDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="batchEndDate">结束日期</label>
+                    <input type="date" id="batchEndDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="batchStatus">状态</label>
+                    <select id="batchStatus" required>
+                        <option value="pending">待处理</option>
+                        <option value="processing">处理中</option>
+                        <option value="completed">已完成</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="batchDescription">详细描述</label>
+                    <textarea id="batchDescription"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>凭证图片</label>
+                    <div class="image-upload">
+                        <input type="file" id="batchImageInput" multiple accept="image/*">
+                        <label for="batchImageInput" class="upload-btn">选择图片</label>
+                        <p>支持上传多张图片，每张不超过2MB</p>
+                    </div>
+                    <div class="preview-images" id="batchPreviewImages">
+                        <!-- 预览图片将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeModal()">取消</button>
+                    <button type="submit" class="save-btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let batches = [];
+        let currentBatchId = null;
+        let uploadedImages = [];
+
+        // 初始化
+        async function init() {
+            await loadBatches();
+        }
+
+        // 加载善款批次列表
+        async function loadBatches() {
+            try {
+                const response = await fetch('/api/batches');
+                batches = await response.json();
+                renderBatches();
+            } catch (error) {
+                console.error('加载善款批次失败', error);
+                alert('加载善款批次失败');
+            }
+        }
+
+        // 渲染善款批次列表
+        function renderBatches() {
+            const batchesList = document.getElementById('batchesList');
+            batchesList.innerHTML = '';
+
+            batches.forEach(batch => {
+                const batchItem = document.createElement('div');
+                batchItem.className = 'batch-item';
+                
+                let imagesHtml = '';
+                if (batch.images && batch.images.length > 0) {
+                    batch.images.forEach(image => {
+                        imagesHtml += `<img src="${image}" class="batch-image" alt="凭证图片">`;
+                    });
+                }
+
+                let statusClass = '';
+                switch (batch.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        break;
+                    case 'processing':
+                        statusClass = 'status-processing';
+                        break;
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        break;
+                }
+
+                batchItem.innerHTML = `
+                    <div class="batch-header">
+                        <div class="batch-info">
+                            <div class="batch-title">${batch.name}</div>
+                            <div class="batch-meta">
+                                <span>批次ID: ${batch.batch_id}</span>
+                                <span>金额: ¥${batch.total_amount.toFixed(2)}</span>
+                                <span>时间: ${batch.start_date} 至 ${batch.end_date}</span>
+                                <span class="status-badge ${statusClass}">${getStatusText(batch.status)}</span>
+                            </div>
+                            <div class="batch-description">${batch.description || '无详细描述'}</div>
+                            ${imagesHtml ? `<div class="batch-images">${imagesHtml}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="edit-btn" onclick="openEditModal('${batch.batch_id}')">编辑</button>
+                        <button class="update-amount-btn" onclick="updateBatchAmount('${batch.batch_id}')">更新金额</button>
+                        <button class="delete-btn" onclick="deleteBatch('${batch.batch_id}')">删除</button>
+                    </div>
+                `;
+
+                batchesList.appendChild(batchItem);
+            });
+        }
+
+        // 获取状态文本
+        function getStatusText(status) {
+            switch (status) {
+                case 'pending':
+                    return '待处理';
+                case 'processing':
+                    return '处理中';
+                case 'completed':
+                    return '已完成';
+                default:
+                    return status;
+            }
+        }
+
+        // 打开添加模态框
+        function openAddModal() {
+            currentBatchId = null;
+            document.getElementById('modalTitle').textContent = '添加善款批次';
+            document.getElementById('batchId').value = '';
+            document.getElementById('batchIdInput').value = '';
+            document.getElementById('batchName').value = '';
+            document.getElementById('batchStartDate').value = '';
+            document.getElementById('batchEndDate').value = '';
+            document.getElementById('batchStatus').value = 'pending';
+            document.getElementById('batchDescription').value = '';
+            
+            // 清空预览图片
+            uploadedImages = [];
+            document.getElementById('batchPreviewImages').innerHTML = '';
+            
+            document.getElementById('batchModal').style.display = 'flex';
+        }
+
+        // 打开编辑模态框
+        async function openEditModal(batchId) {
+            currentBatchId = batchId;
+            document.getElementById('modalTitle').textContent = '编辑善款批次';
+            
+            try {
+                const response = await fetch(`/api/batches/${batchId}?password=admin123`);
+                const batch = await response.json();
+                
+                document.getElementById('batchId').value = batch.batch_id;
+                document.getElementById('batchIdInput').value = batch.batch_id;
+                document.getElementById('batchName').value = batch.name;
+                document.getElementById('batchStartDate').value = batch.start_date;
+                document.getElementById('batchEndDate').value = batch.end_date;
+                document.getElementById('batchStatus').value = batch.status;
+                document.getElementById('batchDescription').value = batch.description || '';
+                
+                // 清空预览图片
+                uploadedImages = batch.images || [];
+                renderBatchPreviewImages();
+                
+                document.getElementById('batchModal').style.display = 'flex';
+            } catch (error) {
+                console.error('加载善款批次详情失败', error);
+                alert('加载善款批次详情失败');
+            }
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('batchModal').style.display = 'none';
+        }
+
+        // 渲染预览图片
+        function renderBatchPreviewImages() {
+            const previewContainer = document.getElementById('batchPreviewImages');
+            previewContainer.innerHTML = '';
+            
+            uploadedImages.forEach((image, index) => {
+                const previewImage = document.createElement('div');
+                previewImage.className = 'preview-image';
+                previewImage.innerHTML = `
+                    <img src="${image}" alt="预览图片">
+                    <button type="button" class="remove-image" onclick="removeBatchImage(${index})">&times;</button>
+                `;
+                previewContainer.appendChild(previewImage);
+            });
+        }
+
+        // 移除图片
+        function removeBatchImage(index) {
+            uploadedImages.splice(index, 1);
+            renderBatchPreviewImages();
+        }
+
+        // 处理图片上传
+        document.getElementById('batchImageInput').addEventListener('change', function(e) {
+            const files = e.target.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedImages.push(e.target.result);
+                        renderBatchPreviewImages();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+        // 提交表单
+        document.getElementById('batchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const batchId = document.getElementById('batchId').value;
+            const batchIdInput = document.getElementById('batchIdInput').value;
+            const name = document.getElementById('batchName').value;
+            const startDate = document.getElementById('batchStartDate').value;
+            const endDate = document.getElementById('batchEndDate').value;
+            const status = document.getElementById('batchStatus').value;
+            const description = document.getElementById('batchDescription').value;
+            
+            const batchData = {
+                batch_id: batchIdInput,
+                name: name,
+                start_date: startDate,
+                end_date: endDate,
+                status: status,
+                description: description,
+                images: uploadedImages
+            };
+            
+            try {
+                let response;
+                if (batchId) {
+                    // 更新批次
+                    response = await fetch(`/api/batches/${batchId}?password=admin123`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(batchData)
+                    });
+                } else {
+                    // 添加批次
+                    response = await fetch('/api/batches?password=admin123', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(batchData)
+                    });
+                }
+                
+                if (response.ok) {
+                    closeModal();
+                    await loadBatches();
+                    alert('操作成功');
+                } else {
+                    const error = await response.json();
+                    alert('操作失败: ' + error.error);
+                }
+            } catch (error) {
+                console.error('操作失败', error);
+                alert('操作失败');
+            }
+        });
+
+        // 更新批次金额
+        async function updateBatchAmount(batchId) {
+            try {
+                const response = await fetch(`/api/batches/${batchId}/update_amount?password=admin123`);
+                if (response.ok) {
+                    await loadBatches();
+                    alert('金额更新成功');
+                } else {
+                    const error = await response.json();
+                    alert('更新失败: ' + error.error);
+                }
+            } catch (error) {
+                console.error('更新失败', error);
+                alert('更新失败');
+            }
+        }
+
+        // 删除批次
+        async function deleteBatch(batchId) {
+            if (!confirm('确定要删除这个善款批次吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/batches/${batchId}?password=admin123`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    await loadBatches();
+                    alert('删除成功');
+                } else {
+                    const error = await response.json();
+                    alert('删除失败: ' + error.error);
+                }
+            } catch (error) {
+                console.error('删除失败', error);
+                alert('删除失败');
+            }
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

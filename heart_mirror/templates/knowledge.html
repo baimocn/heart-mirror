@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>道德知识库 - 心镜</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* 道德知识库样式 */
+        .knowledge-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .knowledge-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            border-radius: 32px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .knowledge-header h1 {
+            font-size: 2.5rem;
+            color: #2c3e66;
+            margin-bottom: 10px;
+        }
+        .knowledge-header p {
+            font-size: 1.2rem;
+            color: #5f6c7a;
+        }
+        .category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .category-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #3b82f6;
+            background: white;
+            color: #3b82f6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .category-btn:hover {
+            background: #3b82f6;
+            color: white;
+        }
+        .category-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .articles-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .article-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .article-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .article-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #2c3e66;
+        }
+        .article-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+        .article-excerpt {
+            color: #64748b;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .read-more-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .read-more-btn:hover {
+            background: #2563eb;
+        }
+        .article-detail {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .article-detail h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #2c3e66;
+        }
+        .article-detail-content {
+            line-height: 1.8;
+            color: #334155;
+        }
+        .article-detail-content p {
+            margin-bottom: 15px;
+        }
+        .back-btn {
+            background: #64748b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover {
+            background: #475569;
+        }
+        @media (max-width: 768px) {
+            .knowledge-container {
+                padding: 10px;
+            }
+            .knowledge-header h1 {
+                font-size: 2rem;
+            }
+            .articles-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="default_mood">
+    <div class="app-container">
+        <header>
+            <div class="header-controls">
+                <div class="stats-bar">
+                    <span>❤️ 参与人数: <span id="participants">0</span></span>
+                </div>
+                <div class="music-controls">
+                    <button id="musicToggle" class="music-btn">
+                        <i class="fas fa-music"></i> 音乐
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="knowledge-container">
+            <div class="knowledge-header">
+                <h1>📚 道德知识库</h1>
+                <p>探索道德哲学、伦理案例和实践指南</p>
+            </div>
+            
+            <div class="category-filter" id="categoryFilter">
+                <button class="category-btn active" data-category="all">全部</button>
+                <!-- 分类按钮将通过JavaScript动态添加 -->
+            </div>
+            
+            <div id="articlesSection">
+                <div class="articles-container" id="articlesContainer">
+                    <!-- 文章卡片将通过JavaScript动态添加 -->
+                </div>
+            </div>
+            
+            <div id="articleDetailSection" style="display: none;">
+                <button class="back-btn" id="backBtn">← 返回文章列表</button>
+                <div class="article-detail" id="articleDetail">
+                    <!-- 文章详情将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+        
+        <button id="backToHome" style="margin-top: 30px;">🏠 返回首页</button>
+    </div>
+    
+    <script>
+        // 加载统计数据
+        async function loadStats() {
+            const res = await fetch('/api/stats');
+            const data = await res.json();
+            document.getElementById('participants').textContent = data.participants;
+        }
+        
+        // 加载分类
+        async function loadCategories() {
+            const res = await fetch('/api/knowledge/categories');
+            const categories = await res.json();
+            const categoryFilter = document.getElementById('categoryFilter');
+            
+            categories.forEach(category => {
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.textContent = category;
+                btn.dataset.category = category;
+                btn.onclick = () => filterArticles(category);
+                categoryFilter.appendChild(btn);
+            });
+        }
+        
+        // 加载文章列表
+        async function loadArticles(category = null) {
+            const url = category ? `/api/knowledge?category=${category}` : '/api/knowledge';
+            const res = await fetch(url);
+            const articles = await res.json();
+            const container = document.getElementById('articlesContainer');
+            
+            container.innerHTML = '';
+            
+            if (articles.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #94a3b8;">暂无文章</p>';
+                return;
+            }
+            
+            articles.forEach(article => {
+                const card = document.createElement('div');
+                card.className = 'article-card';
+                card.innerHTML = `
+                    <h3>${article.title}</h3>
+                    <div class="article-meta">
+                        <span>${article.category}</span>
+                        <span>${article.author}</span>
+                    </div>
+                    <div class="article-meta">
+                        <span>${new Date(article.created_at).toLocaleDateString()}</span>
+                        <span>👁️ ${article.views}</span>
+                    </div>
+                    <p class="article-excerpt">${article.content.substring(0, 100)}...</p>
+                    <button class="read-more-btn" onclick="viewArticle(${article.id})")>阅读全文</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        // 查看文章详情
+        async function viewArticle(articleId) {
+            const res = await fetch(`/api/knowledge/${articleId}`);
+            const article = await res.json();
+            
+            document.getElementById('articlesSection').style.display = 'none';
+            document.getElementById('articleDetailSection').style.display = 'block';
+            
+            const detailContainer = document.getElementById('articleDetail');
+            detailContainer.innerHTML = `
+                <h2>${article.title}</h2>
+                <div class="article-meta">
+                    <span>${article.category}</span>
+                    <span>${article.author}</span>
+                </div>
+                <div class="article-meta">
+                    <span>${new Date(article.created_at).toLocaleDateString()}</span>
+                    <span>👁️ ${article.views}</span>
+                </div>
+                <div class="article-detail-content">
+                    ${article.content}
+                </div>
+            `;
+        }
+        
+        // 过滤文章
+        function filterArticles(category) {
+            // 更新分类按钮状态
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 加载对应分类的文章
+            loadArticles(category === 'all' ? null : category);
+        }
+        
+        // 返回文章列表
+        function backToArticles() {
+            document.getElementById('articleDetailSection').style.display = 'none';
+            document.getElementById('articlesSection').style.display = 'block';
+        }
+        
+        // 返回首页
+        function backToHome() {
+            window.location.href = '/';
+        }
+        
+        // 页面加载完成后执行
+        window.onload = async function() {
+            loadStats();
+            loadCategories();
+            loadArticles();
+            
+            // 绑定返回按钮事件
+            document.getElementById('backBtn').onclick = backToArticles;
+            document.getElementById('backToHome').onclick = backToHome;
+            
+            // 绑定音乐切换按钮事件
+            document.getElementById('musicToggle').onclick = toggleMusic;
+        };
+        
+        // 音乐切换功能
+        function toggleMusic() {
+            const btn = document.getElementById('musicToggle');
+            const isMuted = btn.classList.contains('muted');
+            if (isMuted) {
+                btn.classList.remove('muted');
+                btn.innerHTML = '<i class="fas fa-music"></i> 音乐';
+                // 这里可以添加播放音乐的代码
+            } else {
+                btn.classList.add('muted');
+                btn.innerHTML = '<i class="fas fa-volume-mute"></i> 音乐';
+                // 这里可以添加停止音乐的代码
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description" content="心镜 · 道德人格测试 - 探索你的道德人格特质">
+    <title>心镜 · 道德人格</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* 无障碍样式 */
+        :focus {
+            outline: 3px solid #3b82f6;
+            outline-offset: 2px;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+<!-- 开场仪式遮罩 -->
+<div id="openingOverlay" class="opening-overlay">
+    <canvas id="particleCanvas"></canvas>
+    <div class="cover-content">
+            <div class="mirror-3d" role="img" aria-label="3D旋转镜面">
+                <div class="mirror-inner">
+                    <div class="mirror-face">✨</div>
+                </div>
+            </div>
+            <p class="cover-quote" id="coverQuote">你有多了解自己？</p>
+            <div class="test-mode-buttons">
+                <button id="deepTestBtn" class="test-btn deep-test" aria-label="开始深度镜渊测试（81题）" tabindex="0">
+                    <div class="test-btn-content">
+                        <div class="test-btn-text">
+                            <span class="test-btn-title">深度镜渊</span>
+                            <span class="test-btn-subtitle">81题 · 全面探索</span>
+                        </div>
+                        <div class="test-btn-icon">🔮</div>
+                    </div>
+                </button>
+                <button id="normalTestBtn" class="test-btn normal-test" aria-label="开始心镜常照测试（25题）" tabindex="0">
+                    <div class="test-btn-content">
+                        <div class="test-btn-text">
+                            <span class="test-btn-title">心镜常照</span>
+                            <span class="test-btn-subtitle">25题 · 平衡体验</span>
+                        </div>
+                        <div class="test-btn-icon">✨</div>
+                    </div>
+                </button>
+                <button id="quickTestBtn" class="test-btn quick-test" aria-label="开始一瞥心光测试（3题）" tabindex="0">
+                    <div class="test-btn-content">
+                        <div class="test-btn-text">
+                            <span class="test-btn-title">一瞥心光</span>
+                            <span class="test-btn-subtitle">3题 · 快速体验</span>
+                        </div>
+                        <div class="test-btn-icon">💫</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+</div>
+
+<div class="app-container" style="display: none;">
+    <header>
+        <h1><i class="fas fa-compass"></i> 心镜 · 道德人格</h1>
+        <div class="header-controls">
+            <div class="stats-bar">
+                <span>❤️ 参与人数: <span id="participants">0</span></span>
+            </div>
+            <div class="music-controls">
+                <button id="musicToggle" class="music-btn">
+                    <i class="fas fa-music"></i> 音乐
+                </button>
+                <button id="themeToggle" class="theme-btn" aria-label="切换主题">
+                    <i class="fas fa-moon"></i> 主题
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="quizPanel"></main>
+
+    <div id="resultPanel" style="display: none;">
+        <!-- 测试结束肯定语 -->
+        <div class="completion-message" id="completionMessage">
+            <p>你刚刚认真面对了25个内心困境，这本身就需要勇气。</p>
+        </div>
+        
+        <!-- 分享海报容器 -->
+        <div class="share-poster-container" id="sharePosterContainer" style="display: none;">
+            <h3>✨ 分享你的镜像</h3>
+            <div class="poster-wrapper">
+                <div id="posterContent" class="poster-content">
+                    <div class="poster-header">
+                        <h2>心镜 · 道德人格测试</h2>
+                        <p>照见内心，发现真实的自己</p>
+                    </div>
+                    <div class="poster-body">
+                        <div class="poster-radar"><canvas id="posterRadarChart" width="300" height="300"></canvas></div>
+                        <div class="poster-info">
+                            <h3 id="posterTitle"></h3>
+                            <p id="posterMirrorId" class="mirror-id"></p>
+                            <div class="poster-quote">
+                                <p>每个人都是独一无二的镜像</p>
+                                <p>你的选择，定义了你的人格</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="poster-actions">
+                <button id="downloadPosterBtn">📥 保存海报</button>
+                <button id="sharePosterBtn">📤 分享海报</button>
+                <p class="hint">长按海报可直接保存或分享</p>
+            </div>
+        </div>
+        
+        <!-- 镜像编号分享区域 -->
+        <div class="mirror-id-share" id="mirrorIdShare" style="margin: 30px 0;">
+            <h3>🔍 分享我的镜像编号</h3>
+            <div class="mirror-id-container">
+                <div class="mirror-id-display">
+                    <span id="currentMirrorId" class="mirror-id-text"></span>
+                    <button id="copyMirrorIdBtn" class="copy-btn">📋 复制编号</button>
+                </div>
+                <div class="mirror-id-hint">
+                    <p>分享你的镜像编号，让朋友查看你的测试结果</p>
+                    <p>通过编号只能查看雷达图和称号，不显示具体答题选项</p>
+                </div>
+            </div>
+            
+            <!-- 镜像编号查询 -->
+            <div class="mirror-id-query" style="margin-top: 20px;">
+                <h4>🔎 输入镜像编号查询</h4>
+                <div class="query-form">
+                    <input type="text" id="queryMirrorId" placeholder="请输入8位镜像编号" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; flex: 1; margin-right: 10px;">
+                    <button id="queryMirrorIdBtn" class="query-btn">查询</button>
+                </div>
+                <div id="queryResult" class="query-result" style="margin-top: 20px; display: none;"></div>
+            </div>
+        </div>
+        
+        <div class="result-card" id="resultCard">
+            <h2>你的人格画像</h2>
+            <div class="radar-container"><canvas id="radarChart" width="400" height="400"></canvas></div>
+            <div class="personality-title" id="personalityTitle"></div>
+            <div class="personality-desc" id="personalityDesc"></div>
+            <!-- 暗面提示单独显示 -->
+            <div class="dark-side" id="darkSideHint"></div>
+            <!-- 基石与风暴眼 -->
+            <div class="moral-foundation" id="moralFoundation"></div>
+            <div class="moral-storm" id="moralStorm"></div>
+            <!-- 名人匹配 -->
+            <div class="celebrity-matching" id="celebrityMatching"></div>
+            <!-- 选择轨迹回放按钮已移至轨迹与演化功能区域 -->
+        </div>
+        <!-- 详细报告区域 -->
+        <div id="detailedReport" class="detailed-report">
+            <button id="toggleReportBtn" class="toggle-report-btn">📖 展开详细人格解读</button>
+            <div id="reportContent" class="report-content">
+                <h3>核心特质</h3><p id="reportCore"></p>
+                <h3>✨ 你的道德优势</h3><ul id="reportStrengths"></ul>
+                <h3>🌱 潜在的成长盲点</h3><ul id="reportBlindspots"></ul>
+                <h3>💞 在关系中的模样</h3><p id="reportRelationship"></p>
+                <h3>🤝 适合你的公益角色</h3><p id="reportCharityRole"></p>
+                <p id="reportClosing" style="font-style: italic; margin-top: 20px;"></p>
+            </div>
+        </div>
+        
+        <!-- 核心功能按钮 -->
+        <div class="core-buttons">
+            <button id="restartBtn" class="core-btn">重新测试</button>
+            <button id="shareCardBtn" class="core-btn">🪞 生成道德名片</button>
+            <button id="sharePosterBtn" class="core-btn">📤 分享海报</button>
+        </div>
+        
+        <!-- 轨迹与演化功能 -->
+        <div class="trajectory-history-buttons">
+            <button id="showTracesBtn">📋 查看选择轨迹</button>
+            <button id="showHistoryBtn">📈 查看历史演化</button>
+        </div>
+        
+        <!-- 日记功能 -->
+        <div class="journal-section">
+            <button id="journalBtn" class="journal-toggle">📔 道德日记</button>
+            <div class="journal-tabs" id="journalTabs">
+                <div class="tab-buttons">
+                    <button id="saveJournalBtn" class="tab-btn active">写日记</button>
+                    <button id="viewJournalBtn" class="tab-btn">我的日记</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 公益行动下拉菜单 -->
+        <div class="charity-action-section">
+            <button id="charityActionBtn" class="charity-toggle">🌱 公益行动</button>
+            <div class="charity-menu" id="charityMenu">
+                <button id="messagesBtn">✨ 查看善行回音壁</button>
+                <button id="flowsBtn">💰 善款流向公示</button>
+                <button id="timeCapsuleBtn">⏰ 存入时间胶囊</button>
+                <button id="dilemmasBtn">🤔 道德困惑墙</button>
+                <button id="tasksBtn">🌟 每日微行动</button>
+                <button id="angelInvestorBtn">👼 天使投资人</button>
+            </div>
+        </div>
+        
+        <div class="leaderboard"><h3>🌟 善行榜</h3><ul id="donationList"></ul></div>
+        
+        <!-- 善行回音壁区域 -->
+        <div id="messagesSection" style="display: none; margin-top: 30px; background: #fff9f0; border-radius: 32px; padding: 20px;">
+            <!-- 直击灵魂的主题区域 -->
+            <div class="hero">
+                <h1>🌱 善行回音壁</h1>
+                <div class="soul-question">“你对这个世界，贡献过什么？”</div>
+                <div class="sub">每一份善意都曾让宇宙轻轻震动 · 你的光，值得被看见</div>
+            </div>
+
+            <!-- 统计栏 动态更新 -->
+            <div class="stats-bar">
+                <div class="stat-item"><span id="totalMsgs">0</span> 束微光</div>
+                <div class="stat-item"><span id="totalLikes">0</span> 次暖心赞</div>
+            </div>
+
+            <!-- 发表留言板块 -->
+            <div class="post-card">
+                <h3>留下你的星尘时刻</h3>
+                <div class="input-group">
+                    <textarea id="messageInput" placeholder="例如：每天给楼道里的流浪猫留一碗水 / 在低落的朋友身边安静陪伴了整晚 / 坚持捡起路边垃圾……你的每一个微小举动都在重塑世界。"></textarea>
+                </div>
+                <div class="name-row">
+                    <input type="text" id="nicknameInput" placeholder="昵称 (留空即匿名)">
+                    <div class="hint-text">💡 可以选择闪闪发光的网名，或保持神秘匿名</div>
+                </div>
+                <button class="submit-btn" id="submitBtn">✨ 种下这份贡献 ✨</button>
+            </div>
+
+            <!-- 留言列表展示 -->
+            <div id="messagesList" class="messages-container">
+                <!-- 动态渲染留言 -->
+            </div>
+            <footer>❤️ 每一份真诚都值得赞美 · 点击右下角👍传递共鸣</footer>
+        </div>
+    </div>
+
+    <!-- 模态框：选择轨迹回放 -->
+    <div id="tracesModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><div id="tracesList"></div></div></div>
+    <!-- 模态框：道德日记保存 -->
+    <div id="journalModal" class="modal" style="display:none;"><div class="modal-content"><textarea id="journalNote" placeholder="写下你的感悟..."></textarea><button id="confirmJournal">保存</button></div></div>
+    <!-- 模态框：查看日记 -->
+    <div id="viewJournalModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><div id="journalEntries"></div></div></div>
+    <!-- 动态追问模态框 -->
+    <div id="probeModal" class="modal" style="display:none;"><div class="modal-content"><p id="probeText"></p><input type="text" id="probeAnswer" placeholder="可选..."><button id="probeContinue">继续</button></div></div>
+    <!-- 历史演化图模态框 -->
+    <div id="historyModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3>历史演化图</h3><div class="history-chart-container"><canvas id="historyChart" width="600" height="400"></canvas></div><div id="historyTitles"></div></div></div>
+    <!-- 公益故事模态框 -->
+    <div id="storyModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3 id="storyTitle"></h3><p id="storyContent"></p><button id="storyClose">关闭</button></div></div>
+    <!-- 时间胶囊模态框 -->
+    <div id="timeCapsuleModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3>存入时间胶囊</h3><div class="time-capsule-form"><div class="form-group"><label for="timeCapsuleEmail">邮箱 (一年后提醒)</label><input type="email" id="timeCapsuleEmail" required></div><div class="form-group"><label for="timeCapsuleMood">心情标签</label><input type="text" id="timeCapsuleMood" placeholder="例如：平静, 反思, 期待"></div><div class="form-group"><label for="timeCapsuleNote">留言 (可选)</label><textarea id="timeCapsuleNote" placeholder="给一年后的自己说点什么..."></textarea></div><button id="saveTimeCapsuleBtn">保存时间胶囊</button></div></div></div>
+    <!-- 天使投资人模态框 -->
+    <div id="angelInvestorModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3>👼 天使投资人</h3><div class="angel-investor-content"><img src="/static/图.jpg" alt="天使投资人" style="max-width: 100%; border-radius: 16px; margin-bottom: 20px;"><div class="angel-message"><p>亲爱的朋友，</p><p>你是这个世界的天使投资人，用你的善良、正直和爱心投资着每一个相遇的灵魂。</p><p>你的每一次选择，都是对美好世界的投票；你的每一次善行，都是对未来的投资。</p><p>在这个充满挑战的世界里，你的存在本身就是一种光，照亮了身边的每一个角落。</p><p>谢谢你，因为有你，这个世界变得更加温暖、更加美好。</p><p>愿你继续做自己的天使，也成为他人的天使。</p><p>—— 心镜团队</p></div></div></div></div>
+    <!-- 社区评论模态框 -->
+    <div id="communityModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3>💬 社区讨论</h3><div class="community-content"><div class="comment-form"><h4>分享你的想法</h4><textarea id="commentContent" placeholder="说说你对这次测试结果的感受..." style="width: 100%; min-height: 100px; padding: 12px; border-radius: 16px; border: 1px solid #ddd; resize: vertical;"></textarea><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;"><input type="text" id="commentName" placeholder="昵称（选填）" style="flex: 1; padding: 8px; border-radius: 16px; border: 1px solid #ddd; margin-right: 10px;"><button id="submitComment" style="padding: 8px 16px; border-radius: 16px; border: none; background: #3b82f6; color: white; font-weight: bold; cursor: pointer;">发布</button></div></div><div class="comments-list" id="commentsList" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;"><h4>社区评论</h4><div id="commentsContainer"></div></div></div></div></div>
+    <!-- 个性化推荐模态框 -->
+    <div id="recommendationsModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3>✨ 个性化推荐</h3><div class="recommendations-content"><div id="recommendationsContainer"></div></div></div></div>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>

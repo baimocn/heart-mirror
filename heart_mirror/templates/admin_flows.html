@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>善款流向管理 - 心镜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, -apple-system, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .back-btn {
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: #334155;
+            transform: translateY(-2px);
+        }
+
+        .action-bar {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .add-btn {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .flows-list {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .flow-item {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .flow-item:hover {
+            background: #f8fafc;
+        }
+
+        .flow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .flow-info {
+            flex: 1;
+        }
+
+        .flow-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .flow-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .flow-description {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .flow-images {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .flow-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .edit-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edit-btn:hover {
+            background: #2563eb;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .close:hover {
+            color: #1e293b;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .image-upload {
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .image-upload input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-btn:hover {
+            background: #2563eb;
+        }
+
+        .preview-images {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preview-image {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .preview-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .cancel-btn {
+            background: #64748b;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cancel-btn:hover {
+            background: #475569;
+        }
+
+        .save-btn {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .save-btn:hover {
+            background: #059669;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .flow-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .flow-meta {
+                flex-wrap: wrap;
+            }
+
+            .action-buttons {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 善款流向管理</h1>
+            <a href="/admin?password=admin123" class="back-btn">返回管理面板</a>
+        </header>
+
+        <div class="action-bar">
+            <button class="add-btn" onclick="openAddModal()">+ 添加善款流向记录</button>
+        </div>
+
+        <div class="flows-list" id="flowsList">
+            <!-- 善款流向记录列表将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 添加/编辑善款流向记录模态框 -->
+    <div id="flowModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">添加善款流向记录</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="flowForm">
+                <input type="hidden" id="flowId">
+                
+                <div class="form-group">
+                    <label for="batchId">批次ID</label>
+                    <input type="text" id="batchId" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="flowAmount">金额</label>
+                    <input type="number" id="flowAmount" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="flowPurpose">用途</label>
+                    <input type="text" id="flowPurpose" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="flowDate">日期</label>
+                    <input type="date" id="flowDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="flowDescription">详细描述</label>
+                    <textarea id="flowDescription"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>凭证图片</label>
+                    <div class="image-upload">
+                        <input type="file" id="imageInput" multiple accept="image/*">
+                        <label for="imageInput" class="upload-btn">选择图片</label>
+                        <p>支持上传多张图片，每张不超过2MB</p>
+                    </div>
+                    <div class="preview-images" id="previewImages">
+                        <!-- 预览图片将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeModal()">取消</button>
+                    <button type="submit" class="save-btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let flows = [];
+        let currentFlowId = null;
+        let uploadedImages = [];
+
+        // 初始化
+        async function init() {
+            await loadFlows();
+        }
+
+        // 加载善款流向记录列表
+        async function loadFlows() {
+            try {
+                const response = await fetch('/api/flows');
+                flows = await response.json();
+                renderFlows();
+            } catch (error) {
+                console.error('加载善款流向记录失败', error);
+                alert('加载善款流向记录失败');
+            }
+        }
+
+        // 渲染善款流向记录列表
+        function renderFlows() {
+            const flowsList = document.getElementById('flowsList');
+            flowsList.innerHTML = '';
+
+            flows.forEach(flow => {
+                const flowItem = document.createElement('div');
+                flowItem.className = 'flow-item';
+                
+                let imagesHtml = '';
+                if (flow.images && flow.images.length > 0) {
+                    flow.images.forEach(image => {
+                        imagesHtml += `<img src="${image}" class="flow-image" alt="凭证图片">`;
+                    });
+                }
+
+                flowItem.innerHTML = `
+                    <div class="flow-header">
+                        <div class="flow-info">
+                            <div class="flow-title">${flow.purpose}</div>
+                            <div class="flow-meta">
+                                <span>批次ID: ${flow.batch_id}</span>
+                                <span>金额: ¥${flow.amount.toFixed(2)}</span>
+                                <span>日期: ${flow.date}</span>
+                            </div>
+                            <div class="flow-description">${flow.description || '无详细描述'}</div>
+                            ${imagesHtml ? `<div class="flow-images">${imagesHtml}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="edit-btn" onclick="openEditModal(${flow.id})">编辑</button>
+                        <button class="delete-btn" onclick="deleteFlow(${flow.id})">删除</button>
+                    </div>
+                `;
+
+                flowsList.appendChild(flowItem);
+            });
+        }
+
+        // 打开添加模态框
+        function openAddModal() {
+            currentFlowId = null;
+            document.getElementById('modalTitle').textContent = '添加善款流向记录';
+            document.getElementById('flowId').value = '';
+            document.getElementById('batchId').value = '';
+            document.getElementById('flowAmount').value = '';
+            document.getElementById('flowPurpose').value = '';
+            document.getElementById('flowDate').value = '';
+            document.getElementById('flowDescription').value = '';
+            
+            // 清空预览图片
+            uploadedImages = [];
+            document.getElementById('previewImages').innerHTML = '';
+            
+            document.getElementById('flowModal').style.display = 'flex';
+        }
+
+        // 打开编辑模态框
+        async function openEditModal(flowId) {
+            currentFlowId = flowId;
+            document.getElementById('modalTitle').textContent = '编辑善款流向记录';
+            
+            try {
+                const response = await fetch(`/api/flows/${flowId}?password=admin123`);
+                const flow = await response.json();
+                
+                document.getElementById('flowId').value = flow.id;
+                document.getElementById('batchId').value = flow.batch_id;
+                document.getElementById('flowAmount').value = flow.amount;
+                document.getElementById('flowPurpose').value = flow.purpose;
+                document.getElementById('flowDate').value = flow.date;
+                document.getElementById('flowDescription').value = flow.description || '';
+                
+                // 清空预览图片
+                uploadedImages = flow.images || [];
+                renderPreviewImages();
+                
+                document.getElementById('flowModal').style.display = 'flex';
+            } catch (error) {
+                console.error('加载善款流向记录详情失败', error);
+                alert('加载善款流向记录详情失败');
+            }
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('flowModal').style.display = 'none';
+        }
+
+        // 渲染预览图片
+        function renderPreviewImages() {
+            const previewContainer = document.getElementById('previewImages');
+            previewContainer.innerHTML = '';
+            
+            uploadedImages.forEach((image, index) => {
+                const previewImage = document.createElement('div');
+                previewImage.className = 'preview-image';
+                previewImage.innerHTML = `
+                    <img src="${image}" alt="预览图片">
+                    <button type="button" class="remove-image" onclick="removeImage(${index})">&times;</button>
+                `;
+                previewContainer.appendChild(previewImage);
+            });
+        }
+
+        // 移除图片
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            renderPreviewImages();
+        }
+
+        // 处理图片上传
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const files = e.target.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedImages.push(e.target.result);
+                        renderPreviewImages();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+        // 提交表单
+        document.getElementById('flowForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('flowId').value;
+            const batchId = document.getElementById('batchId').value;
+            const amount = parseFloat(document.getElementById('flowAmount').value);
+            const purpose = document.getElementById('flowPurpose').value;
+            const date = document.getElementById('flowDate').value;
+            const description = document.getElementById('flowDescription').value;
+            
+            const flowData = {
+                batch_id: batchId,
+                amount: amount,
+                purpose: purpose,
+                date: date,
+                description: description,
+                images: uploadedImages
+            };
+            
+            try {
+                let response;
+                if (id) {
+                    // 更新记录
+                    response = await fetch(`/api/flows/${id}?password=admin123`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(flowData)
+                    });
+                } else {
+                    // 添加记录
+                    response = await fetch('/api/flows?password=admin123', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(flowData)
+                    });
+                }
+                
+                if (response.ok) {
+                    closeModal();
+                    await loadFlows();
+                    alert('操作成功');
+                } else {
+                    const error = await response.json();
+                    alert('操作失败: ' + error.error);
+                }
+            } catch (error) {
+                console.error('操作失败', error);
+                alert('操作失败');
+            }
+        });
+
+        // 删除记录
+        async function deleteFlow(flowId) {
+            if (!confirm('确定要删除这个善款流向记录吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/flows/${flowId}?password=admin123`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    await loadFlows();
+                    alert('删除成功');
+                } else {
+                    const error = await response.json();
+                    alert('删除失败: ' + error.error);
+                }
+            } catch (error) {
+                console.error('删除失败', error);
+                alert('删除失败');
+            }
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

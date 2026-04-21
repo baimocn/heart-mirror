@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>光之印记 · 世界贡献留言板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f7f3e9 0%, #e8e0d5 100%);
+            font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            padding: 2rem 1.5rem;
+            color: #2c2b28;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+        }
+
+        /* 头部灵魂区域 */
+        .hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding: 2rem 1rem 1.5rem;
+            background: rgba(255, 250, 240, 0.7);
+            backdrop-filter: blur(2px);
+            border-radius: 64px 64px 48px 48px;
+            box-shadow: 0 10px 25px -12px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,245,225,0.9);
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #3b2a1f, #9b6e3e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 1px 2px rgba(255,255,200,0.8);
+        }
+
+        .hero .soul-question {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #4a3724;
+            margin: 0.5rem 0 0.75rem;
+            line-height: 1.2;
+            word-break: keep-all;
+        }
+
+        .hero .sub {
+            font-size: 1rem;
+            color: #7c634b;
+            max-width: 550px;
+            margin: 0 auto;
+            border-top: 1px solid #e2cfb3;
+            padding-top: 1rem;
+            display: inline-block;
+        }
+
+        /* 统计卡片 */
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: #fffbf4;
+            padding: 0.9rem 1.8rem;
+            border-radius: 60px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02), 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #ede3d4;
+        }
+
+        .stat-item {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #5f4c38;
+        }
+
+        .stat-item span {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #b47c48;
+            margin-right: 6px;
+        }
+
+        /* 留言板表单 */
+        .post-card {
+            background: #ffffffdd;
+            backdrop-filter: blur(8px);
+            background: #fffef9;
+            border-radius: 32px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 12px 28px -12px rgba(0, 0, 0, 0.12);
+            border: 1px solid #f2e5d6;
+            transition: all 0.2s ease;
+        }
+
+        .post-card h3 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: #4f3a28;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .post-card h3:before {
+            content: "✨";
+            font-size: 1.3rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            border: 1.5px solid #e9dfd1;
+            border-radius: 24px;
+            background: #fffef8;
+            transition: 0.2s;
+            resize: vertical;
+        }
+
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #c2a071;
+            box-shadow: 0 0 0 3px rgba(194, 160, 113, 0.2);
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        .name-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .name-row input {
+            flex: 2;
+            min-width: 160px;
+        }
+
+        .hint-text {
+            font-size: 0.75rem;
+            color: #9b886f;
+            margin-top: 6px;
+            margin-left: 8px;
+        }
+
+        .submit-btn {
+            background: #8f6a3c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            margin-top: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        }
+
+        .submit-btn:hover {
+            background: #73552e;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(100, 60, 20, 0.15);
+        }
+
+        /* 留言列表 */
+        .messages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.3rem;
+            margin-top: 0.5rem;
+        }
+
+        .message-card {
+            background: #fffcf7;
+            border-radius: 28px;
+            padding: 1.3rem 1.5rem;
+            transition: all 0.2s;
+            border: 1px solid #f0e4d4;
+            box-shadow: 0 6px 12px -8px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-content {
+            font-size: 1.05rem;
+            line-height: 1.45;
+            color: #2e2b26;
+            margin-bottom: 1.2rem;
+            word-break: break-word;
+            white-space: pre-wrap;
+            font-weight: 470;
+            padding-right: 0.5rem;
+        }
+
+        .message-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-top: 1px solid #f0e4d4;
+            padding-top: 0.9rem;
+            margin-top: 0.2rem;
+        }
+
+        .author-info {
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+            color: #9a7b5c;
+        }
+
+        .author-name {
+            font-weight: 600;
+            background: #f6efe7;
+            padding: 4px 12px;
+            border-radius: 40px;
+            color: #7c5b3a;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #b7a07e;
+            letter-spacing: 0.2px;
+        }
+
+        /* 右下角点赞区 */
+        .like-area {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #faf3ea;
+            padding: 6px 12px 6px 8px;
+            border-radius: 40px;
+            transition: 0.1s;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .like-area:hover {
+            background: #f0e2d2;
+            transform: scale(0.97);
+        }
+
+        .like-btn {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            color: #b77b3a;
+            transition: 0.1s;
+        }
+
+        .like-count {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6f4a26;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        /* 空状态 */
+        .empty-message {
+            background: #fdf7ef;
+            border-radius: 48px;
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            color: #b2956e;
+            font-style: italic;
+            border: 1px dashed #e7cfb4;
+        }
+
+        footer {
+            margin-top: 2.8rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #b9a282;
+            padding: 1rem;
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 250, 240, 0.8);
+            border: 1px solid #e2cfb3;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 250, 240, 1);
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 580px) {
+            body {
+                padding: 1rem;
+            }
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+            .hero .soul-question {
+                font-size: 1.4rem;
+            }
+            .message-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .like-area {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 返回按钮 -->
+<button class="back-btn" onclick="window.location.href='/'">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5"/>
+        <path d="M12 19l-7-7 7-7"/>
+    </svg>
+</button>
+
+<div class="container">
+    <!-- 直击灵魂的主题区域 -->
+    <div class="hero">
+        <h1>🌱 善行回音壁</h1>
+        <div class="soul-question">“你对这个世界，贡献过什么？”</div>
+        <div class="sub">每一份善意都曾让宇宙轻轻震动 · 你的光，值得被看见</div>
+    </div>
+
+    <!-- 统计栏 动态更新 -->
+    <div class="stats-bar">
+        <div class="stat-item"><span id="totalMsgs">0</span> 束微光</div>
+        <div class="stat-item"><span id="totalLikes">0</span> 次暖心赞</div>
+    </div>
+
+    <!-- 发表留言板块 -->
+    <div class="post-card">
+        <h3>留下你的星尘时刻</h3>
+        <div class="input-group">
+            <textarea id="messageInput" placeholder="例如：每天给楼道里的流浪猫留一碗水 / 在低落的朋友身边安静陪伴了整晚 / 坚持捡起路边垃圾……你的每一个微小举动都在重塑世界。"></textarea>
+        </div>
+        <div class="name-row">
+            <input type="text" id="nicknameInput" placeholder="昵称 (留空即匿名)">
+            <div class="hint-text">💡 可以选择闪闪发光的网名，或保持神秘匿名</div>
+        </div>
+        <button class="submit-btn" id="submitBtn">✨ 种下这份贡献 ✨</button>
+    </div>
+
+    <!-- 留言列表展示 -->
+    <div id="messagesList" class="messages-container">
+        <!-- 动态渲染留言 -->
+    </div>
+    <footer>❤️ 每一份真诚都值得赞美 · 点击右下角👍传递共鸣</footer>
+</div>
+
+<script>
+    // ---------- 数据模型 ----------
+    // 留言结构：id, content, nickname(若空代表匿名), likes, timestamp(ISO)
+    let messages = [];
+
+    // localStorage 键名
+    const STORAGE_KEY = "world_contribution_board";
+
+    // 辅助函数：转义HTML防XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // 格式化时间 (YYYY-MM-DD HH:MM)
+    function formatTime(isoString) {
+        const date = new Date(isoString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+
+    // 保存至localStorage
+    function saveToLocal() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    }
+
+    // 加载初始示例数据 (仅当无数据时)
+    function loadSampleMessages() {
+        const now = new Date();
+        const sample = [
+            {
+                id: Date.now() + 101,
+                content: "每周四去特殊教育学校陪孩子们画画，他们脸上的笑容就是我的星星。",
+                nickname: "星光画师",
+                likes: 12,
+                timestamp: new Date(now.getTime() - 2 * 24 * 3600000).toISOString()
+            },
+            {
+                id: Date.now() + 102,
+                content: "在小区设置了一个‘共享书箱’，邻居们可以自由交换书籍，已经运行半年啦！",
+                nickname: "书页摆渡人",
+                likes: 28,
+                timestamp: new Date(now.getTime() - 5 * 24 * 3600000).toISOString()
+            },
+            {
+                id: Date.now() + 103,
+                content: "坚持每天给外卖小哥递一瓶水，哪怕只是一句“辛苦了”。",
+                nickname: null,  // 匿名
+                likes: 45,
+                timestamp: new Date(now.getTime() - 1 * 24 * 3600000).toISOString()
+            },
+            {
+                id: Date.now() + 104,
+                content: "参与乡村支教线上授课，教孩子们英语，看到他们眼睛里对外面的渴望，一切都值了。",
+                nickname: "山野点灯人",
+                likes: 33,
+                timestamp: new Date(now.getTime() - 12 * 3600000).toISOString()
+            }
+        ];
+        return sample;
+    }
+
+    // 加载数据
+    function loadMessages() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length) {
+                    messages = parsed;
+                    return;
+                } else {
+                    // 空数组 也重新填充示例让版面温暖
+                    messages = loadSampleMessages();
+                    saveToLocal();
+                }
+            } catch(e) {
+                messages = loadSampleMessages();
+                saveToLocal();
+            }
+        } else {
+            messages = loadSampleMessages();
+            saveToLocal();
+        }
+    }
+
+    // 更新统计 (留言总数，总点赞数)
+    function updateStats() {
+        const totalMsgsSpan = document.getElementById("totalMsgs");
+        const totalLikesSpan = document.getElementById("totalLikes");
+        if (totalMsgsSpan) totalMsgsSpan.innerText = messages.length;
+        if (totalLikesSpan) {
+            const sumLikes = messages.reduce((acc, msg) => acc + (msg.likes || 0), 0);
+            totalLikesSpan.innerText = sumLikes;
+        }
+    }
+
+    // 核心渲染: 展示所有留言 (最新留言在上方)
+    function renderMessages() {
+        const container = document.getElementById("messagesList");
+        if (!container) return;
+
+        if (!messages.length) {
+            container.innerHTML = `<div class="empty-message">✨ 还没有人留下痕迹，不如做第一个点亮世界的人 ✨</div>`;
+            updateStats();
+            return;
+        }
+
+        // 按照时间倒序（最新在前）
+        const sorted = [...messages].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        let html = '';
+        for (let msg of sorted) {
+            const id = msg.id;
+            const content = escapeHtml(msg.content);
+            // 昵称处理: 如果有nickname且不为空字符串则显示，否则显示“匿名”
+            let displayName = '';
+            if (msg.nickname && msg.nickname.trim() !== '') {
+                displayName = escapeHtml(msg.nickname.trim());
+            } else {
+                displayName = '🌙 匿名';
+            }
+            const timeStr = formatTime(msg.timestamp);
+            const likes = msg.likes || 0;
+
+            // 卡片结构: 右下角点赞区在message-footer内右侧
+            html += `
+                <div class="message-card" data-msg-id="${id}">
+                    <div class="message-content">${content}</div>
+                    <div class="message-footer">
+                        <div class="author-info">
+                            <span class="author-name">${displayName}</span>
+                            <span class="message-time">📅 ${timeStr}</span>
+                        </div>
+                        <div class="like-area" data-like-id="${id}">
+                            <button class="like-btn" data-id="${id}" aria-label="点赞">👍</button>
+                            <span class="like-count" data-likecount="${id}">${likes}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+        updateStats();
+    }
+
+    // 添加新留言
+    function addNewMessage(content, nicknameRaw) {
+        if (!content || content.trim() === '') {
+            alert("💫 请分享你的贡献，哪怕再小的光也值得记录～");
+            return false;
+        }
+        const trimmedContent = content.trim();
+        if (trimmedContent.length > 800) {
+            alert("你的善意很温暖，但可以简洁一些（不超过800字）❤️");
+            return false;
+        }
+
+        let finalNickname = null;
+        if (nicknameRaw && nicknameRaw.trim() !== '') {
+            finalNickname = nicknameRaw.trim().substring(0, 30); // 限制长度
+        } else {
+            finalNickname = null;   // 匿名
+        }
+
+        const newMsg = {
+            id: Date.now() + Math.floor(Math.random() * 10000),
+            content: trimmedContent,
+            nickname: finalNickname,
+            likes: 0,
+            timestamp: new Date().toISOString()
+        };
+        messages.unshift(newMsg);  // 最新插入到数组头部，方便渲染时最新在最上
+        saveToLocal();
+        renderMessages();
+        return true;
+    }
+
+    // 点赞功能 (通过id增加赞数)
+    function likeMessage(messageId) {
+        // 检查用户是否已经点赞过
+        const likedMessages = JSON.parse(localStorage.getItem('liked_messages') || '[]');
+        if (likedMessages.includes(messageId)) {
+            alert('你已经点赞过这条留言了');
+            return;
+        }
+        
+        const targetIndex = messages.findIndex(msg => msg.id == messageId);
+        if (targetIndex !== -1) {
+            // 增加点赞数
+            messages[targetIndex].likes = (messages[targetIndex].likes || 0) + 1;
+            
+            // 记录用户已点赞
+            likedMessages.push(messageId);
+            localStorage.setItem('liked_messages', JSON.stringify(likedMessages));
+            
+            saveToLocal();
+            renderMessages();   // 刷新界面, 右下角点赞数会更新
+            // 轻反馈 (可选微震动效果)
+            const likeSpan = document.querySelector(`.like-count[data-likecount="${messageId}"]`);
+            if (likeSpan) {
+                likeSpan.style.transform = "scale(1.2)";
+                setTimeout(() => { if(likeSpan) likeSpan.style.transform = ""; }, 150);
+            }
+        } else {
+            console.warn("留言不存在");
+        }
+    }
+
+    // 事件委托 (处理点赞 + 确保动态加载元素有效)
+    function bindGlobalEvents() {
+        const container = document.getElementById("messagesList");
+        if (!container) return;
+
+        // 利用事件委托监听点赞区域 (防止重复绑定，使用容器级监听)
+        container.addEventListener('click', (e) => {
+            // 获取实际的点赞按钮或者.like-area区域
+            let targetBtn = e.target.closest('.like-btn');
+            if (targetBtn && targetBtn.dataset.id) {
+                e.preventDefault();
+                const msgId = targetBtn.dataset.id;
+                if (msgId) {
+                    likeMessage(parseInt(msgId));
+                }
+                return;
+            }
+            // 如果直接点击了like-area区域但没有点到按钮, 也可以触发 (提升易用性)
+            const likeArea = e.target.closest('.like-area');
+            if (likeArea && likeArea.dataset.likeId) {
+                const msgId = likeArea.dataset.likeId;
+                if (msgId) {
+                    likeMessage(parseInt(msgId));
+                }
+                return;
+            }
+        });
+    }
+
+    // 提交表单逻辑
+    function initSubmit() {
+        const submitBtn = document.getElementById("submitBtn");
+        const messageInput = document.getElementById("messageInput");
+        const nicknameInput = document.getElementById("nicknameInput");
+
+        if (!submitBtn) return;
+
+        submitBtn.addEventListener('click', () => {
+            const content = messageInput.value;
+            const nickname = nicknameInput.value;
+            const success = addNewMessage(content, nickname);
+            if (success) {
+                // 清空表单
+                messageInput.value = '';
+                nicknameInput.value = '';
+                // 轻提示风格（无侵入）
+                const tempTip = document.createElement('div');
+                tempTip.innerText = '✨ 感谢你的光芒，世界因你更温暖 ✨';
+                tempTip.style.position = 'fixed';
+                tempTip.style.bottom = '20px';
+                tempTip.style.left = '50%';
+                tempTip.style.transform = 'translateX(-50%)';
+                tempTip.style.backgroundColor = '#4f3a28';
+                tempTip.style.color = '#fff3e6';
+                tempTip.style.padding = '8px 24px';
+                tempTip.style.borderRadius = '60px';
+                tempTip.style.fontSize = '0.85rem';
+                tempTip.style.zIndex = '999';
+                tempTip.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                document.body.appendChild(tempTip);
+                setTimeout(() => { tempTip.remove(); }, 2000);
+            }
+        });
+    }
+
+    // 可选：额外允许回车快捷提交，但不是必须，为了舒适体验，在textarea按ctrl+enter提交
+    function bindShortcut() {
+        const textarea = document.getElementById("messageInput");
+        if (textarea) {
+            textarea.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById("submitBtn")?.click();
+                }
+            });
+        }
+    }
+
+    // 初始化所有数据和渲染
+    function init() {
+        loadMessages();         // 从localstorage加载或者加载样本
+        renderMessages();       // 首次渲染
+        bindGlobalEvents();     // 点赞委托 (必须，因重新渲染后内容动态变化)
+        initSubmit();           // 提交事件
+        bindShortcut();         // 快捷键提升体验
+    }
+
+    // 启动整个留言板
+    init();
+</script>
+</body>
+</html>

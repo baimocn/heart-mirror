@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题库管理 - 心镜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, -apple-system, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .back-btn {
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: #334155;
+            transform: translateY(-2px);
+        }
+
+        .action-bar {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .add-btn {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-bar button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-bar button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .questions-list {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-item {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .question-item:hover {
+            background: #f8fafc;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .category-tag {
+            background: #e0f2fe;
+            color: #0284c7;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .options-list {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .option-item {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .edit-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edit-btn:hover {
+            background: #2563eb;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .close:hover {
+            color: #1e293b;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .option-form {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .remove-option {
+            background: #ef4444;
+            color: white;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .add-option-btn {
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .cancel-btn {
+            background: #64748b;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cancel-btn:hover {
+            background: #475569;
+        }
+
+        .save-btn {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .save-btn:hover {
+            background: #059669;
+        }
+
+        .dimension-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .dimension-input {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dimension-input label {
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+
+        .dimension-input input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .question-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .question-meta {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 题库管理</h1>
+            <a href="/admin?password=admin123" class="back-btn">返回管理面板</a>
+        </header>
+
+        <div class="action-bar">
+            <button class="add-btn" onclick="openAddModal()">+ 添加题目</button>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="搜索题目...">
+                <button onclick="searchQuestions()">搜索</button>
+            </div>
+        </div>
+
+        <div class="questions-list" id="questionsList">
+            <!-- 题目列表将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 添加/编辑题目模态框 -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">添加题目</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="questionForm">
+                <input type="hidden" id="questionId">
+                
+                <div class="form-group">
+                    <label for="questionText">题目内容</label>
+                    <textarea id="questionText" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="questionCategory">类别</label>
+                    <select id="questionCategory" required>
+                        <option value="justice">正义感</option>
+                        <option value="altruism">利他主义</option>
+                        <option value="rule">规则遵从</option>
+                        <option value="empathy">共情力</option>
+                        <option value="utilitarian">功利倾向</option>
+                        <option value="punish">惩罚欲</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="questionMood">Mood</label>
+                    <input type="text" id="questionMood" placeholder="例如：peaceful, intense, conflicted等">
+                </div>
+
+                <div class="form-group">
+                    <label>选项</label>
+                    <div id="optionsContainer">
+                        <!-- 选项将通过JavaScript动态生成 -->
+                    </div>
+                    <button type="button" class="add-option-btn" onclick="addOption()">+ 添加选项</button>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeModal()">取消</button>
+                    <button type="submit" class="save-btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let questions = [];
+        let currentQuestionId = null;
+
+        // 初始化
+        async function init() {
+            await loadQuestions();
+        }
+
+        // 加载题目列表
+        async function loadQuestions() {
+            try {
+                const response = await fetch('/api/questions');
+                const data = await response.json();
+                questions = data.questions;
+                renderQuestions();
+            } catch (error) {
+                console.error('加载题目失败', error);
+                alert('加载题目失败');
+            }
+        }
+
+        // 渲染题目列表
+        function renderQuestions() {
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '';
+
+            questions.forEach(question => {
+                const questionItem = document.createElement('div');
+                questionItem.className = 'question-item';
+                
+                let optionsHtml = '';
+                question.options.forEach((option, index) => {
+                    optionsHtml += `<div class="option-item">${index + 1}. ${option.text}</div>`;
+                });
+
+                questionItem.innerHTML = `
+                    <div class="question-header">
+                        <div class="question-text">${question.text}</div>
+                        <div class="question-meta">
+                            <span class="category-tag">${question.category}</span>
+                            <span class="category-tag">${question.mood || 'default'}</span>
+                        </div>
+                    </div>
+                    <div class="options-list">
+                        ${optionsHtml}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="edit-btn" onclick="openEditModal(${question.id})">编辑</button>
+                        <button class="delete-btn" onclick="deleteQuestion(${question.id})">删除</button>
+                    </div>
+                `;
+
+                questionsList.appendChild(questionItem);
+            });
+        }
+
+        // 打开添加模态框
+        function openAddModal() {
+            currentQuestionId = null;
+            document.getElementById('modalTitle').textContent = '添加题目';
+            document.getElementById('questionId').value = '';
+            document.getElementById('questionText').value = '';
+            document.getElementById('questionCategory').value = 'justice';
+            document.getElementById('questionMood').value = '';
+            
+            // 清空选项容器
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            // 添加两个默认选项
+            addOption();
+            addOption();
+            
+            document.getElementById('questionModal').style.display = 'flex';
+        }
+
+        // 打开编辑模态框
+        async function openEditModal(questionId) {
+            currentQuestionId = questionId;
+            document.getElementById('modalTitle').textContent = '编辑题目';
+            
+            try {
+                const response = await fetch(`/api/questions/${questionId}?password=admin123`);
+                const question = await response.json();
+                
+                document.getElementById('questionId').value = question.id;
+                document.getElementById('questionText').value = question.text;
+                document.getElementById('questionCategory').value = question.category;
+                document.getElementById('questionMood').value = question.mood || '';
+                
+                // 清空选项容器
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.innerHTML = '';
+                
+                // 添加选项
+                question.options.forEach(option => {
+                    addOption(option);
+                });
+                
+                document.getElementById('questionModal').style.display = 'flex';
+            } catch (error) {
+                console.error('加载题目详情失败', error);
+                alert('加载题目详情失败');
+            }
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('questionModal').style.display = 'none';
+        }
+
+        // 添加选项
+        function addOption(option = null) {
+            const optionsContainer = document.getElementById('optionsContainer');
+            const optionIndex = optionsContainer.children.length;
+            
+            const optionForm = document.createElement('div');
+            optionForm.className = 'option-form';
+            
+            optionForm.innerHTML = `
+                <div class="option-header">
+                    <h4>选项 ${optionIndex + 1}</h4>
+                    <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
+                </div>
+                <div class="form-group">
+                    <label for="optionText${optionIndex}">选项内容</label>
+                    <input type="text" id="optionText${optionIndex}" value="${option ? option.text : ''}" required>
+                </div>
+                <div class="form-group">
+                    <label for="optionIcon${optionIndex}">图标 (Font Awesome)</label>
+                    <input type="text" id="optionIcon${optionIndex}" value="${option ? option.icon : 'fa-circle-question'}">
+                </div>
+                <div class="form-group">
+                    <label>维度增量</label>
+                    <div class="dimension-inputs">
+                        <div class="dimension-input">
+                            <label>正义感</label>
+                            <input type="number" id="optionJustice${optionIndex}" value="${option ? option.increments.justice : 0}" min="-2" max="2">
+                        </div>
+                        <div class="dimension-input">
+                            <label>利他主义</label>
+                            <input type="number" id="optionAltruism${optionIndex}" value="${option ? option.increments.altruism : 0}" min="-2" max="2">
+                        </div>
+                        <div class="dimension-input">
+                            <label>规则遵从</label>
+                            <input type="number" id="optionRule${optionIndex}" value="${option ? option.increments.rule : 0}" min="-2" max="2">
+                        </div>
+                        <div class="dimension-input">
+                            <label>共情力</label>
+                            <input type="number" id="optionEmpathy${optionIndex}" value="${option ? option.increments.empathy : 0}" min="-2" max="2">
+                        </div>
+                        <div class="dimension-input">
+                            <label>功利倾向</label>
+                            <input type="number" id="optionUtilitarian${optionIndex}" value="${option ? option.increments.utilitarian : 0}" min="-2" max="2">
+                        </div>
+                        <div class="dimension-input">
+                            <label>惩罚欲</label>
+                            <input type="number" id="optionPunish${optionIndex}" value="${option ? option.increments.punish : 0}" min="-2" max="2">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="optionReflection${optionIndex}">反思</label>
+                    <textarea id="optionReflection${optionIndex}">${option ? (option.reflection || '') : ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="optionInnerVoice${optionIndex}">内心声音</label>
+                    <textarea id="optionInnerVoice${optionIndex}">${option ? (option.inner_voice || '') : ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="optionAiTrigger${optionIndex}" ${option && option.ai_trigger ? 'checked' : ''}>
+                        触发AI对话
+                    </label>
+                </div>
+            `;
+            
+            optionsContainer.appendChild(optionForm);
+        }
+
+        // 移除选项
+        function removeOption(button) {
+            const optionForm = button.closest('.option-form');
+            optionForm.remove();
+        }
+
+        // 提交表单
+        document.getElementById('questionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('questionId').value;
+            const text = document.getElementById('questionText').value;
+            const category = document.getElementById('questionCategory').value;
+            const mood = document.getElementById('questionMood').value;
+            
+            // 收集选项
+            const options = [];
+            const optionForms = document.querySelectorAll('.option-form');
+            
+            optionForms.forEach((form, index) => {
+                options.push({
+                    text: document.getElementById(`optionText${index}`).value,
+                    icon: document.getElementById(`optionIcon${index}`).value,
+                    increments: {
+                        justice: parseInt(document.getElementById(`optionJustice${index}`).value) || 0,
+                        altruism: parseInt(document.getElementById(`optionAltruism${index}`).value) || 0,
+                        rule: parseInt(document.getElementById(`optionRule${index}`).value) || 0,
+                        empathy: parseInt(document.getElementById(`optionEmpathy${index}`).value) || 0,
+                        utilitarian: parseInt(document.getElementById(`optionUtilitarian${index}`).value) || 0,
+                        punish: parseInt(document.getElementById(`optionPunish${index}`).value) || 0
+                    },
+                    reflection: document.getElementById(`optionReflection${index}`).value,
+                    inner_voice: document.getElementById(`optionInnerVoice${index}`).value,
+                    ai_trigger: document.getElementById(`optionAiTrigger${index}`).checked
+                });
+            });
+            
+            const questionData = {
+                text,
+                category,
+                mood,
+                options
+            };
+            
+            try {
+                let response;
+                if (id) {
+                    // 更新题目
+                    questionData.id = parseInt(id);
+                    response = await fetch(`/api/questions/${id}?password=admin123`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(questionData)
+                    });
+                } else {
+                    // 添加题目
+                    response = await fetch('/api/questions?password=admin123', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(questionData)
+                    });
+                }
+                
+                if (response.ok) {
+                    closeModal();
+                    await loadQuestions();
+                    alert('操作成功');
+                } else {
+                    const error = await response.json();
+                    alert('操作失败: ' + error.error);
+                }
+            } catch (error) {
+                console.error('操作失败', error);
+                alert('操作失败');
+            }
+        });
+
+        // 删除题目
+        async function deleteQuestion(questionId) {
+            if (!confirm('确定要删除这个题目吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/questions/${questionId}?password=admin123`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    await loadQuestions();
+                    alert('删除成功');
+                } else {
+                    const error = await response.json();
+                    alert('删除失败: ' + error.error);
+                }
+            } catch (error) {
+                console.error('删除失败', error);
+                alert('删除失败');
+            }
+        }
+
+        // 搜索题目
+        function searchQuestions() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const questionItems = document.querySelectorAll('.question-item');
+            
+            questionItems.forEach(item => {
+                const questionText = item.querySelector('.question-text').textContent.toLowerCase();
+                if (questionText.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

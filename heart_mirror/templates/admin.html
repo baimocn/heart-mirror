@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心镜管理系统 - 数据分析看板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, -apple-system, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            color: #10b981;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+
+        canvas {
+            max-height: 300px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .back-btn:hover {
+            background: #334155;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 心镜数据分析看板</h1>
+            <div class="subtitle">实时监控系统运行状态和用户行为</div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">今日参与人数</div>
+                <div class="stat-value" id="todayParticipants">0</div>
+                <div class="stat-change">+12% 较昨日</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">本周参与人数</div>
+                <div class="stat-value" id="weekParticipants">0</div>
+                <div class="stat-change">+8% 较上周</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">今日捐款总额</div>
+                <div class="stat-value" id="todayDonation">¥0</div>
+                <div class="stat-change">+15% 较昨日</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">本周捐款总额</div>
+                <div class="stat-value" id="weekDonation">¥0</div>
+                <div class="stat-change">+10% 较上周</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title">参与人数趋势</div>
+                <canvas id="participantsChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">捐款趋势</div>
+                <canvas id="donationChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">最受欢迎的题目</div>
+                <canvas id="popularQuestionsChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">捐款转化率</div>
+                <canvas id="conversionChart"></canvas>
+            </div>
+        </div>
+
+        <a href="/" class="back-btn">返回首页</a>
+    </div>
+
+    <script>
+        // 模拟数据
+        const mockData = {
+            today_participants: 120,
+            week_participants: 850,
+            today_donation: 1250.50,
+            week_donation: 8750.75,
+            popular_questions: [[1, 250], [2, 200], [3, 180], [4, 150], [5, 120]],
+            conversion_rate: 15.5
+        };
+
+        // 初始化数据
+        document.getElementById('todayParticipants').innerText = mockData.today_participants;
+        document.getElementById('weekParticipants').innerText = mockData.week_participants;
+        document.getElementById('todayDonation').innerText = '¥' + mockData.today_donation.toFixed(2);
+        document.getElementById('weekDonation').innerText = '¥' + mockData.week_donation.toFixed(2);
+
+        // 参与人数趋势图
+        const participantsCtx = document.getElementById('participantsChart').getContext('2d');
+        new Chart(participantsCtx, {
+            type: 'line',
+            data: {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [{
+                    label: '参与人数',
+                    data: [100, 120, 110, 130, 140, 160, 180],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // 捐款趋势图
+        const donationCtx = document.getElementById('donationChart').getContext('2d');
+        new Chart(donationCtx, {
+            type: 'bar',
+            data: {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [{
+                    label: '捐款金额',
+                    data: [800, 950, 850, 1100, 1200, 1400, 1500],
+                    backgroundColor: '#10b981'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // 最受欢迎的题目
+        const popularCtx = document.getElementById('popularQuestionsChart').getContext('2d');
+        new Chart(popularCtx, {
+            type: 'bar',
+            data: {
+                labels: mockData.popular_questions.map(q => '题目 ' + q[0]),
+                datasets: [{
+                    label: '被选次数',
+                    data: mockData.popular_questions.map(q => q[1]),
+                    backgroundColor: '#8b5cf6'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // 捐款转化率
+        const conversionCtx = document.getElementById('conversionChart').getContext('2d');
+        new Chart(conversionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['捐款用户', '未捐款用户'],
+                datasets: [{
+                    data: [mockData.conversion_rate, 100 - mockData.conversion_rate],
+                    backgroundColor: ['#f59e0b', '#e5e7eb']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // 实际项目中，这里应该从API获取数据
+        /*
+        fetch('/api/admin/stats?password=admin123')
+            .then(response => response.json())
+            .then(data => {
+                // 更新数据
+                document.getElementById('todayParticipants').innerText = data.today_participants;
+                document.getElementById('weekParticipants').innerText = data.week_participants;
+                document.getElementById('todayDonation').innerText = '¥' + data.today_donation.toFixed(2);
+                document.getElementById('weekDonation').innerText = '¥' + data.week_donation.toFixed(2);
+                
+                // 更新图表
+                // ...
+            })
+            .catch(error => {
+                console.error('获取数据失败:', error);
+            });
+        */
+    </script>
+</body>
+</html>
