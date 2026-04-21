@@ -1,1 +1,1 @@
-web: gunicorn heart_mirror.app:app
+web: PYTHONPATH=. gunicorn heart_mirror.app:app
