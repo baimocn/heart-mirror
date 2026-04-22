@@ -4,7 +4,8 @@ import json
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
-DB_PATH = 'database/heart_mirror.db'
+# 使用绝对路径连接数据库
+DB_PATH = os.path.join(os.path.dirname(__file__), 'database', 'heart_mirror.db')
 
 def init_db():
     os.makedirs('database', exist_ok=True)

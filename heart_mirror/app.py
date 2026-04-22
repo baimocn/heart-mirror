@@ -230,7 +230,7 @@ def submit():
         c = conn.cursor()
         
         # 更新统计
-        c.execute('UPDATE stats SET participants = participants+1, donation = donation+0.01 WHERE id=1')
+        increment_participant()
         
         # 获取fingerprint
         fingerprint = data.get('fingerprint', '')

@@ -2591,8 +2591,17 @@ function showFeedback(message, type) {
 }
 
 // 更新统计
-function updateStats() {
-    // 这里可以添加统计更新逻辑
+async function updateStats() {
+    try {
+        const response = await fetch('/api/stats');
+        const data = await response.json();
+        const participantsElement = document.getElementById('participants');
+        if (participantsElement) {
+            participantsElement.innerText = data.participants;
+        }
+    } catch (error) {
+        console.error('更新统计数据失败', error);
+    }
 }
 
 // 更新留言统计
@@ -2650,13 +2659,15 @@ function toggleTheme() {
 }
 
 // 初始化
-function init() {
+async function init() {
     // 初始化粒子背景
     initParticles();
     // 加载封面数据
     loadCoverData();
     // 初始化主题
     initTheme();
+    // 更新统计数据
+    await updateStats();
     // 绑定深度镜渊测试按钮（81题）
     document.getElementById('deepTestBtn').onclick = function() {
         document.querySelector('.opening-overlay').style.display = 'none';
@@ -2698,7 +2709,9 @@ let messages = [];
 
 // 页面加载完成后初始化
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', async function() {
+        await init();
+    });
 } else {
     init();
 }
