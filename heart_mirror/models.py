@@ -164,13 +164,13 @@ def delete_time_capsule(capsule_id):
     """删除时间胶囊"""
     db_service.delete_time_capsule(capsule_id)
 
-def add_moral_dilemma(device_id, content, options, is_anonymous=1):
+def add_moral_dilemma(device_id, title, content, description, background, options, category, is_anonymous=1):
     """添加道德困惑"""
-    return db_service.add_moral_dilemma(device_id, content, options, is_anonymous)
+    return db_service.add_moral_dilemma(device_id, title, content, description, background, options, category, is_anonymous)
 
-def get_moral_dilemmas():
+def get_moral_dilemmas(sort_by='latest', category=None):
     """获取所有道德困惑"""
-    dilemmas = db_service.get_moral_dilemmas()
+    dilemmas = db_service.get_moral_dilemmas(sort_by, category)
     for dilemma in dilemmas:
         dilemma['user_id'] = dilemma.get('user_id', None)
     return dilemmas
@@ -189,6 +189,67 @@ def update_moral_dilemma_votes(dilemma_id, option_index):
 def delete_moral_dilemma(dilemma_id):
     """删除道德困惑"""
     db_service.delete_moral_dilemma(dilemma_id)
+
+# 评论相关函数
+def add_dilemma_comment(dilemma_id, device_id, nickname, content, parent_id=None):
+    """添加道德困惑评论"""
+    return db_service.add_dilemma_comment(dilemma_id, device_id, nickname, content, parent_id)
+
+def get_dilemma_comments(dilemma_id):
+    """获取道德困惑评论"""
+    return db_service.get_dilemma_comments(dilemma_id)
+
+# 点赞相关函数
+def like_dilemma(dilemma_id, device_id):
+    """点赞道德困惑"""
+    return db_service.like_dilemma(dilemma_id, device_id)
+
+def unlike_dilemma(dilemma_id, device_id):
+    """取消点赞道德困惑"""
+    return db_service.unlike_dilemma(dilemma_id, device_id)
+
+def is_dilemma_liked(dilemma_id, device_id):
+    """检查道德困惑是否被点赞"""
+    return db_service.is_dilemma_liked(dilemma_id, device_id)
+
+# 收藏相关函数
+def favorite_dilemma(dilemma_id, device_id):
+    """收藏道德困惑"""
+    return db_service.favorite_dilemma(dilemma_id, device_id)
+
+def unfavorite_dilemma(dilemma_id, device_id):
+    """取消收藏道德困惑"""
+    return db_service.unfavorite_dilemma(dilemma_id, device_id)
+
+def is_dilemma_favorited(dilemma_id, device_id):
+    """检查道德困惑是否被收藏"""
+    return db_service.is_dilemma_favorited(dilemma_id, device_id)
+
+# 关注相关函数
+def follow_dilemma(dilemma_id, device_id):
+    """关注道德困惑"""
+    return db_service.follow_dilemma(dilemma_id, device_id)
+
+def unfollow_dilemma(dilemma_id, device_id):
+    """取消关注道德困惑"""
+    return db_service.unfollow_dilemma(dilemma_id, device_id)
+
+def is_dilemma_followed(dilemma_id, device_id):
+    """检查道德困惑是否被关注"""
+    return db_service.is_dilemma_followed(dilemma_id, device_id)
+
+# 评论点赞相关函数
+def like_comment(comment_id, device_id):
+    """点赞评论"""
+    return db_service.like_comment(comment_id, device_id)
+
+def unlike_comment(comment_id, device_id):
+    """取消点赞评论"""
+    return db_service.unlike_comment(comment_id, device_id)
+
+def is_comment_liked(comment_id, device_id):
+    """检查评论是否被点赞"""
+    return db_service.is_comment_liked(comment_id, device_id)
 
 def add_daily_task(title, description, category, difficulty, points):
     """添加每日任务"""

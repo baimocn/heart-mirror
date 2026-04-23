@@ -1,5 +1,5 @@
 from flask import request, jsonify, render_template
-from models import get_moral_dilemmas, add_moral_dilemma, get_moral_dilemma_by_id, delete_moral_dilemma, update_moral_dilemma_votes, get_comments, add_comment, get_messages as get_messages_model, add_message, like_message as like_message_model
+from models import get_moral_dilemmas, add_moral_dilemma, get_moral_dilemma_by_id, delete_moral_dilemma, update_moral_dilemma_votes, get_comments, add_comment, get_messages as get_messages_model, add_message, like_message as like_message_model, add_dilemma_comment, get_dilemma_comments, like_dilemma, unlike_dilemma, is_dilemma_liked, favorite_dilemma, unfavorite_dilemma, is_dilemma_favorited, follow_dilemma, unfollow_dilemma, is_dilemma_followed, like_comment, unlike_comment, is_comment_liked
 from app import app
 
 # 道德困惑墙相关路由
@@ -10,19 +10,25 @@ def dilemmas():
 @app.route('/api/dilemmas', methods=['GET', 'POST'])
 def moral_dilemmas():
     if request.method == 'GET':
-        dilemmas = get_moral_dilemmas()
+        sort_by = request.args.get('sort_by', 'latest')
+        category = request.args.get('category')
+        dilemmas = get_moral_dilemmas(sort_by, category)
         return jsonify(dilemmas), 200
     elif request.method == 'POST':
         data = request.json
         device_id = data.get('device_id')
+        title = data.get('title')
         content = data.get('content')
+        description = data.get('description', '')
+        background = data.get('background', '')
         options = data.get('options', [])
+        category = data.get('category', '其他')
         is_anonymous = data.get('is_anonymous', 1)
         
-        if not device_id or not content or len(options) < 2:
-            return jsonify({'error': 'device_id, content, and at least 2 options are required'}), 400
+        if not device_id or not title or not content or len(options) < 2:
+            return jsonify({'error': 'device_id, title, content, and at least 2 options are required'}), 400
         
-        dilemma_id = add_moral_dilemma(device_id, content, options, is_anonymous)
+        dilemma_id = add_moral_dilemma(device_id, title, content, description, background, options, category, is_anonymous)
         return jsonify({'message': '道德困惑发布成功', 'id': dilemma_id}), 201
 
 @app.route('/api/dilemmas/<int:dilemma_id>', methods=['GET', 'DELETE'])
@@ -103,3 +109,178 @@ def api_like_message():
         return jsonify({'message': '点赞成功'}), 200
     else:
         return jsonify({'error': '点赞失败'}), 500
+
+# 道德困惑评论相关路由
+@app.route('/api/dilemmas/<int:dilemma_id>/comments', methods=['GET', 'POST'])
+def dilemma_comments(dilemma_id):
+    if request.method == 'GET':
+        comments = get_dilemma_comments(dilemma_id)
+        return jsonify(comments), 200
+    elif request.method == 'POST':
+        data = request.json
+        device_id = data.get('device_id')
+        nickname = data.get('nickname', '匿名用户')
+        content = data.get('content')
+        parent_id = data.get('parent_id')
+        
+        if not device_id or not content:
+            return jsonify({'error': 'device_id and content are required'}), 400
+        
+        comment_id = add_dilemma_comment(dilemma_id, device_id, nickname, content, parent_id)
+        return jsonify({'message': '评论发布成功', 'id': comment_id}), 201
+
+# 道德困惑点赞相关路由
+@app.route('/api/dilemmas/<int:dilemma_id>/like', methods=['POST'])
+def dilemma_like(dilemma_id):
+    data = request.json
+    device_id = data.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    success = like_dilemma(dilemma_id, device_id)
+    if success:
+        return jsonify({'message': '点赞成功'}), 200
+    else:
+        return jsonify({'error': '点赞失败'}), 500
+
+@app.route('/api/dilemmas/<int:dilemma_id>/unlike', methods=['POST'])
+def dilemma_unlike(dilemma_id):
+    data = request.json
+    device_id = data.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    success = unlike_dilemma(dilemma_id, device_id)
+    if success:
+        return jsonify({'message': '取消点赞成功'}), 200
+    else:
+        return jsonify({'error': '取消点赞失败'}), 500
+
+@app.route('/api/dilemmas/<int:dilemma_id>/is_liked', methods=['GET'])
+def dilemma_is_liked(dilemma_id):
+    device_id = request.args.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    is_liked = is_dilemma_liked(dilemma_id, device_id)
+    return jsonify({'is_liked': is_liked}), 200
+
+# 道德困惑收藏相关路由
+@app.route('/api/dilemmas/<int:dilemma_id>/favorite', methods=['POST'])
+def dilemma_favorite(dilemma_id):
+    data = request.json
+    device_id = data.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    success = favorite_dilemma(dilemma_id, device_id)
+    if success:
+        return jsonify({'message': '收藏成功'}), 200
+    else:
+        return jsonify({'error': '收藏失败'}), 500
+
+@app.route('/api/dilemmas/<int:dilemma_id>/unfavorite', methods=['POST'])
+def dilemma_unfavorite(dilemma_id):
+    data = request.json
+    device_id = data.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    success = unfavorite_dilemma(dilemma_id, device_id)
+    if success:
+        return jsonify({'message': '取消收藏成功'}), 200
+    else:
+        return jsonify({'error': '取消收藏失败'}), 500
+
+@app.route('/api/dilemmas/<int:dilemma_id>/is_favorited', methods=['GET'])
+def dilemma_is_favorited(dilemma_id):
+    device_id = request.args.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    is_favorited = is_dilemma_favorited(dilemma_id, device_id)
+    return jsonify({'is_favorited': is_favorited}), 200
+
+# 道德困惑关注相关路由
+@app.route('/api/dilemmas/<int:dilemma_id>/follow', methods=['POST'])
+def dilemma_follow(dilemma_id):
+    data = request.json
+    device_id = data.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    success = follow_dilemma(dilemma_id, device_id)
+    if success:
+        return jsonify({'message': '关注成功'}), 200
+    else:
+        return jsonify({'error': '关注失败'}), 500
+
+@app.route('/api/dilemmas/<int:dilemma_id>/unfollow', methods=['POST'])
+def dilemma_unfollow(dilemma_id):
+    data = request.json
+    device_id = data.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    success = unfollow_dilemma(dilemma_id, device_id)
+    if success:
+        return jsonify({'message': '取消关注成功'}), 200
+    else:
+        return jsonify({'error': '取消关注失败'}), 500
+
+@app.route('/api/dilemmas/<int:dilemma_id>/is_followed', methods=['GET'])
+def dilemma_is_followed(dilemma_id):
+    device_id = request.args.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    is_followed = is_dilemma_followed(dilemma_id, device_id)
+    return jsonify({'is_followed': is_followed}), 200
+
+# 评论点赞相关路由
+@app.route('/api/comments/<int:comment_id>/like', methods=['POST'])
+def comment_like(comment_id):
+    data = request.json
+    device_id = data.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    success = like_comment(comment_id, device_id)
+    if success:
+        return jsonify({'message': '点赞成功'}), 200
+    else:
+        return jsonify({'error': '点赞失败'}), 500
+
+@app.route('/api/comments/<int:comment_id>/unlike', methods=['POST'])
+def comment_unlike(comment_id):
+    data = request.json
+    device_id = data.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    success = unlike_comment(comment_id, device_id)
+    if success:
+        return jsonify({'message': '取消点赞成功'}), 200
+    else:
+        return jsonify({'error': '取消点赞失败'}), 500
+
+@app.route('/api/comments/<int:comment_id>/is_liked', methods=['GET'])
+def comment_is_liked(comment_id):
+    device_id = request.args.get('device_id')
+    
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    
+    is_liked = is_comment_liked(comment_id, device_id)
+    return jsonify({'is_liked': is_liked}), 200

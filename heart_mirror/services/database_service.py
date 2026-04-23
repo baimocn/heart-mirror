@@ -111,10 +111,17 @@ class DatabaseService:
             CREATE TABLE IF NOT EXISTS moral_dilemmas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 device_id TEXT,
+                title TEXT,
                 content TEXT,
+                description TEXT,
+                background TEXT,
                 options TEXT,
                 is_anonymous INTEGER DEFAULT 1,
                 votes TEXT,
+                views INTEGER DEFAULT 0,
+                likes INTEGER DEFAULT 0,
+                category TEXT,
+                comment_count INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -211,6 +218,64 @@ class DatabaseService:
                 category TEXT,
                 views INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        # 道德困惑评论表
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS dilemma_comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                dilemma_id INTEGER,
+                device_id TEXT,
+                nickname TEXT,
+                content TEXT,
+                likes INTEGER DEFAULT 0,
+                parent_id INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        # 道德困惑点赞表
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS dilemma_likes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                dilemma_id INTEGER,
+                device_id TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(dilemma_id, device_id)
+            )
+        ''')
+        
+        # 道德困惑收藏表
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS dilemma_favorites (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                dilemma_id INTEGER,
+                device_id TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(dilemma_id, device_id)
+            )
+        ''')
+        
+        # 道德困惑关注表
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS dilemma_follows (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                dilemma_id INTEGER,
+                device_id TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(dilemma_id, device_id)
+            )
+        ''')
+        
+        # 评论点赞表
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS comment_likes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                comment_id INTEGER,
+                device_id TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(comment_id, device_id)
             )
         ''')
         
@@ -642,55 +707,96 @@ class DatabaseService:
         conn.commit()
         conn.close()
     
-    def add_moral_dilemma(self, device_id, content, options, is_anonymous):
+    def add_moral_dilemma(self, device_id, title, content, description, background, options, category, is_anonymous):
         """添加道德困惑"""
         conn = self._get_connection()
         c = conn.cursor()
         # 初始化投票数组
         votes = json.dumps([0] * len(options))
-        c.execute('INSERT INTO moral_dilemmas (device_id, content, options, is_anonymous, votes) VALUES (?, ?, ?, ?, ?)',
-                  (device_id, content, json.dumps(options), is_anonymous, votes))
+        c.execute('INSERT INTO moral_dilemmas (device_id, title, content, description, background, options, category, is_anonymous, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                  (device_id, title, content, description, background, json.dumps(options), category, is_anonymous, votes))
         dilemma_id = c.lastrowid
         c.execute('UPDATE stats SET dilemma_posts = dilemma_posts + 1 WHERE id = 1')
         conn.commit()
         conn.close()
         return dilemma_id
     
-    def get_moral_dilemmas(self):
+    def get_moral_dilemmas(self, sort_by='created_at', category=None):
         """获取道德困惑列表"""
         conn = self._get_connection()
         c = conn.cursor()
-        c.execute('SELECT id, device_id, content, options, is_anonymous, votes, created_at FROM moral_dilemmas ORDER BY created_at DESC')
+        
+        # 构建查询语句
+        query = 'SELECT id, device_id, title, content, description, background, options, is_anonymous, votes, views, likes, category, comment_count, created_at FROM moral_dilemmas'
+        params = []
+        
+        # 添加类别筛选
+        if category:
+            query += ' WHERE category = ?'
+            params.append(category)
+        
+        # 添加排序
+        if sort_by == 'latest':
+            query += ' ORDER BY created_at DESC'
+        elif sort_by == 'most_discussed':
+            query += ' ORDER BY comment_count DESC, created_at DESC'
+        elif sort_by == 'most_liked':
+            query += ' ORDER BY likes DESC, created_at DESC'
+        else:
+            query += ' ORDER BY created_at DESC'
+        
+        c.execute(query, params)
         rows = c.fetchall()
         conn.close()
         
         return [{
             'id': row[0],
             'device_id': row[1],
-            'content': row[2],
-            'options': json.loads(row[3]),
-            'is_anonymous': row[4],
-            'votes': json.loads(row[5]),
-            'created_at': row[6]
+            'title': row[2],
+            'content': row[3],
+            'description': row[4],
+            'background': row[5],
+            'options': json.loads(row[6]),
+            'is_anonymous': row[7],
+            'votes': json.loads(row[8]),
+            'views': row[9],
+            'likes': row[10],
+            'category': row[11],
+            'comment_count': row[12],
+            'created_at': row[13]
         } for row in rows]
     
     def get_moral_dilemma_by_id(self, dilemma_id):
         """根据ID获取道德困惑"""
         conn = self._get_connection()
         c = conn.cursor()
-        c.execute('SELECT id, device_id, content, options, is_anonymous, votes, created_at FROM moral_dilemmas WHERE id = ?', (dilemma_id,))
+        c.execute('SELECT id, device_id, title, content, description, background, options, is_anonymous, votes, views, likes, category, comment_count, created_at FROM moral_dilemmas WHERE id = ?', (dilemma_id,))
         row = c.fetchone()
         conn.close()
         
         if row:
+            # 增加浏览量
+            conn = self._get_connection()
+            c = conn.cursor()
+            c.execute('UPDATE moral_dilemmas SET views = views + 1 WHERE id = ?', (dilemma_id,))
+            conn.commit()
+            conn.close()
+            
             return {
                 'id': row[0],
                 'device_id': row[1],
-                'content': row[2],
-                'options': json.loads(row[3]),
-                'is_anonymous': row[4],
-                'votes': json.loads(row[5]),
-                'created_at': row[6]
+                'title': row[2],
+                'content': row[3],
+                'description': row[4],
+                'background': row[5],
+                'options': json.loads(row[6]),
+                'is_anonymous': row[7],
+                'votes': json.loads(row[8]),
+                'views': row[9] + 1,  # 实时更新浏览量
+                'likes': row[10],
+                'category': row[11],
+                'comment_count': row[12],
+                'created_at': row[13]
             }
         return None
     
@@ -993,6 +1099,223 @@ class DatabaseService:
         conn.close()
         
         return [row[0] for row in rows]
+    
+    # 评论相关方法
+    def add_dilemma_comment(self, dilemma_id, device_id, nickname, content, parent_id=None):
+        """添加道德困惑评论"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        c.execute('INSERT INTO dilemma_comments (dilemma_id, device_id, nickname, content, parent_id) VALUES (?, ?, ?, ?, ?)',
+                  (dilemma_id, device_id, nickname, content, parent_id))
+        comment_id = c.lastrowid
+        # 更新评论计数
+        c.execute('UPDATE moral_dilemmas SET comment_count = comment_count + 1 WHERE id = ?', (dilemma_id,))
+        conn.commit()
+        conn.close()
+        return comment_id
+    
+    def get_dilemma_comments(self, dilemma_id):
+        """获取道德困惑评论"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        c.execute('SELECT id, dilemma_id, device_id, nickname, content, likes, parent_id, created_at FROM dilemma_comments WHERE dilemma_id = ? ORDER BY created_at ASC', (dilemma_id,))
+        rows = c.fetchall()
+        conn.close()
+        
+        return [{
+            'id': row[0],
+            'dilemma_id': row[1],
+            'device_id': row[2],
+            'nickname': row[3],
+            'content': row[4],
+            'likes': row[5],
+            'parent_id': row[6],
+            'created_at': row[7]
+        } for row in rows]
+    
+    # 点赞相关方法
+    def like_dilemma(self, dilemma_id, device_id):
+        """点赞道德困惑"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        try:
+            # 开始事务
+            conn.execute('BEGIN TRANSACTION')
+            # 插入点赞记录
+            c.execute('INSERT OR IGNORE INTO dilemma_likes (dilemma_id, device_id) VALUES (?, ?)', (dilemma_id, device_id))
+            # 更新点赞数
+            c.execute('UPDATE moral_dilemmas SET likes = (SELECT COUNT(*) FROM dilemma_likes WHERE dilemma_id = ?) WHERE id = ?', (dilemma_id, dilemma_id))
+            # 提交事务
+            conn.commit()
+            return True
+        except Exception as e:
+            # 回滚事务
+            conn.rollback()
+            print(f"Error liking dilemma: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def unlike_dilemma(self, dilemma_id, device_id):
+        """取消点赞道德困惑"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        try:
+            # 开始事务
+            conn.execute('BEGIN TRANSACTION')
+            # 删除点赞记录
+            c.execute('DELETE FROM dilemma_likes WHERE dilemma_id = ? AND device_id = ?', (dilemma_id, device_id))
+            # 更新点赞数
+            c.execute('UPDATE moral_dilemmas SET likes = (SELECT COUNT(*) FROM dilemma_likes WHERE dilemma_id = ?) WHERE id = ?', (dilemma_id, dilemma_id))
+            # 提交事务
+            conn.commit()
+            return True
+        except Exception as e:
+            # 回滚事务
+            conn.rollback()
+            print(f"Error unliking dilemma: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def is_dilemma_liked(self, dilemma_id, device_id):
+        """检查道德困惑是否被点赞"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        c.execute('SELECT COUNT(*) FROM dilemma_likes WHERE dilemma_id = ? AND device_id = ?', (dilemma_id, device_id))
+        count = c.fetchone()[0]
+        conn.close()
+        return count > 0
+    
+    # 收藏相关方法
+    def favorite_dilemma(self, dilemma_id, device_id):
+        """收藏道德困惑"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        try:
+            c.execute('INSERT OR IGNORE INTO dilemma_favorites (dilemma_id, device_id) VALUES (?, ?)', (dilemma_id, device_id))
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error favoriting dilemma: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def unfavorite_dilemma(self, dilemma_id, device_id):
+        """取消收藏道德困惑"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        try:
+            c.execute('DELETE FROM dilemma_favorites WHERE dilemma_id = ? AND device_id = ?', (dilemma_id, device_id))
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error unfavoriting dilemma: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def is_dilemma_favorited(self, dilemma_id, device_id):
+        """检查道德困惑是否被收藏"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        c.execute('SELECT COUNT(*) FROM dilemma_favorites WHERE dilemma_id = ? AND device_id = ?', (dilemma_id, device_id))
+        count = c.fetchone()[0]
+        conn.close()
+        return count > 0
+    
+    # 关注相关方法
+    def follow_dilemma(self, dilemma_id, device_id):
+        """关注道德困惑"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        try:
+            c.execute('INSERT OR IGNORE INTO dilemma_follows (dilemma_id, device_id) VALUES (?, ?)', (dilemma_id, device_id))
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error following dilemma: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def unfollow_dilemma(self, dilemma_id, device_id):
+        """取消关注道德困惑"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        try:
+            c.execute('DELETE FROM dilemma_follows WHERE dilemma_id = ? AND device_id = ?', (dilemma_id, device_id))
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error unfollowing dilemma: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def is_dilemma_followed(self, dilemma_id, device_id):
+        """检查道德困惑是否被关注"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        c.execute('SELECT COUNT(*) FROM dilemma_follows WHERE dilemma_id = ? AND device_id = ?', (dilemma_id, device_id))
+        count = c.fetchone()[0]
+        conn.close()
+        return count > 0
+    
+    # 评论点赞相关方法
+    def like_comment(self, comment_id, device_id):
+        """点赞评论"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        try:
+            # 开始事务
+            conn.execute('BEGIN TRANSACTION')
+            # 插入点赞记录
+            c.execute('INSERT OR IGNORE INTO comment_likes (comment_id, device_id) VALUES (?, ?)', (comment_id, device_id))
+            # 更新点赞数
+            c.execute('UPDATE dilemma_comments SET likes = (SELECT COUNT(*) FROM comment_likes WHERE comment_id = ?) WHERE id = ?', (comment_id, comment_id))
+            # 提交事务
+            conn.commit()
+            return True
+        except Exception as e:
+            # 回滚事务
+            conn.rollback()
+            print(f"Error liking comment: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def unlike_comment(self, comment_id, device_id):
+        """取消点赞评论"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        try:
+            # 开始事务
+            conn.execute('BEGIN TRANSACTION')
+            # 删除点赞记录
+            c.execute('DELETE FROM comment_likes WHERE comment_id = ? AND device_id = ?', (comment_id, device_id))
+            # 更新点赞数
+            c.execute('UPDATE dilemma_comments SET likes = (SELECT COUNT(*) FROM comment_likes WHERE comment_id = ?) WHERE id = ?', (comment_id, comment_id))
+            # 提交事务
+            conn.commit()
+            return True
+        except Exception as e:
+            # 回滚事务
+            conn.rollback()
+            print(f"Error unliking comment: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def is_comment_liked(self, comment_id, device_id):
+        """检查评论是否被点赞"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        c.execute('SELECT COUNT(*) FROM comment_likes WHERE comment_id = ? AND device_id = ?', (comment_id, device_id))
+        count = c.fetchone()[0]
+        conn.close()
+        return count > 0
     
     def get_personalized_recommendations(self, device_id, scores):
         """获取个性化推荐"""
