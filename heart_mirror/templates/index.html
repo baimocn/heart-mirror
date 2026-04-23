@@ -6,7 +6,7 @@
     <meta name="description" content="心镜 · 道德人格测试 - 探索你的道德人格特质">
     <title>心镜 · 道德人格</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -186,33 +186,34 @@
             <button id="sharePosterBtn" class="core-btn">📤 分享海报</button>
         </div>
         
+        <!-- 锚点功能 -->
+        <div class="anchor-section" style="margin: 20px 0; padding: 20px; background: #f5f5f5; border-radius: 16px;">
+            <h3>🔗 锚点</h3>
+            <p>输入数字账号，关联你的测试数据</p>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <input type="text" id="anchorInput" placeholder="请输入数字账号" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                <button id="anchorConfirmBtn" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">确认</button>
+            </div>
+            <div id="anchorFeedback" style="margin-top: 10px; padding: 10px; border-radius: 8px; display: none;"></div>
+        </div>
+        
         <!-- 轨迹与演化功能 -->
         <div class="trajectory-history-buttons">
             <button id="showTracesBtn">📋 查看选择轨迹</button>
             <button id="showHistoryBtn">📈 查看历史演化</button>
         </div>
         
-        <!-- 日记功能 -->
-        <div class="journal-section">
-            <button id="journalBtn" class="journal-toggle">📔 道德日记</button>
-            <div class="journal-tabs" id="journalTabs">
-                <div class="tab-buttons">
-                    <button id="saveJournalBtn" class="tab-btn active">写日记</button>
-                    <button id="viewJournalBtn" class="tab-btn">我的日记</button>
-                </div>
-            </div>
-        </div>
+
         
         <!-- 公益行动下拉菜单 -->
         <div class="charity-action-section">
             <button id="charityActionBtn" class="charity-toggle">🌱 公益行动</button>
             <div class="charity-menu" id="charityMenu">
                 <button id="messagesBtn">✨ 查看善行回音壁</button>
-                <button id="flowsBtn">💰 善款流向公示</button>
                 <button id="timeCapsuleBtn">⏰ 存入时间胶囊</button>
                 <button id="dilemmasBtn">🤔 道德困惑墙</button>
                 <button id="tasksBtn">🌟 每日微行动</button>
-                <button id="angelInvestorBtn">👼 天使投资人</button>
+                <button id="angelInvestorBtn">👼 微光同行者</button>
             </div>
         </div>
         
@@ -252,12 +253,122 @@
             </div>
             <footer>❤️ 每一份真诚都值得赞美 · 点击右下角👍传递共鸣</footer>
         </div>
+        
+        <!-- 时间胶囊区域 -->
+        <div id="timeCapsuleSection" style="display: none; margin-top: 30px; background: #fff9f0; border-radius: 32px; padding: 20px;">
+            <!-- 直击灵魂的主题区域 -->
+            <div class="hero">
+                <h1>⏰ 存入时间胶囊</h1>
+                <div class="soul-question">“一年后的你，会是什么样子？”</div>
+                <div class="sub">时间是最好的镜子 · 让我们一起期待未来的自己</div>
+            </div>
+
+            <!-- 时间胶囊表单 -->
+            <div class="post-card">
+                <h3>给未来的自己</h3>
+                <div class="input-group">
+                    <label for="timeCapsuleEmail">邮箱 (一年后提醒)</label>
+                    <input type="email" id="timeCapsuleEmail" placeholder="请输入你的邮箱" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px;">
+                </div>
+                <div class="input-group">
+                    <label for="timeCapsuleMood">心情标签</label>
+                    <input type="text" id="timeCapsuleMood" placeholder="例如：平静, 反思, 期待" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px;">
+                </div>
+                <div class="input-group">
+                    <label for="timeCapsuleNote">留言 (可选)</label>
+                    <textarea id="timeCapsuleNote" placeholder="给一年后的自己说点什么..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; min-height: 100px;"></textarea>
+                </div>
+                <button class="submit-btn" id="saveTimeCapsuleBtn">保存时间胶囊</button>
+            </div>
+            <footer>⏰ 一年后，我们会通过邮箱提醒你查看今天的留言</footer>
+        </div>
+        
+        <!-- 道德困惑墙区域 -->
+        <div id="dilemmasSection" style="display: none; margin-top: 30px; background: #fff9f0; border-radius: 32px; padding: 20px;">
+            <!-- 直击灵魂的主题区域 -->
+            <div class="hero">
+                <h1>🤔 道德困惑墙</h1>
+                <div class="soul-question">“你遇到过哪些道德困境？”</div>
+                <div class="sub">分享你的困惑 · 让集体智慧为你指引方向</div>
+            </div>
+
+            <!-- 道德困惑内容 -->
+            <div class="post-card">
+                <h3>探索道德边界</h3>
+                <p style="margin-bottom: 20px;">道德困惑墙是一个分享和讨论道德困境的平台。在这里，你可以：</p>
+                <ul style="margin-bottom: 20px;">
+                    <li>分享你遇到的道德困境</li>
+                    <li>查看他人的困惑和解决方案</li>
+                    <li>参与讨论，提供你的观点和建议</li>
+                </ul>
+                <p>通过分享和讨论，我们可以更好地理解道德的复杂性，找到更明智的决策方式。</p>
+            </div>
+            <footer>🤔 每一个困惑都是成长的机会</footer>
+        </div>
+        
+        <!-- 每日微行动区域 -->
+        <div id="tasksSection" style="display: none; margin-top: 30px; background: #fff9f0; border-radius: 32px; padding: 20px;">
+            <!-- 直击灵魂的主题区域 -->
+            <div class="hero">
+                <h1>🌟 每日微行动</h1>
+                <div class="soul-question">“今天，你能为世界做些什么？”</div>
+                <div class="sub">小行动，大改变 · 让善意成为日常</div>
+            </div>
+
+            <!-- 每日微行动内容 -->
+            <div class="post-card">
+                <h3>今日行动建议</h3>
+                <p style="margin-bottom: 20px;">每日微行动是一系列简单易行的善举，你可以：</p>
+                <ul style="margin-bottom: 20px;">
+                    <li>为家人准备一杯热水</li>
+                    <li>对陌生人微笑并问好</li>
+                    <li>捡起路边的垃圾</li>
+                    <li>给朋友发一条鼓励的消息</li>
+                    <li>节约用水用电</li>
+                </ul>
+                <p>这些微小的行动，汇聚起来就是改变世界的力量。</p>
+            </div>
+            <footer>🌟 每一个小行动都有意义</footer>
+        </div>
+        
+        <!-- 微光同行者区域 -->
+        <div id="angelInvestorSection" style="display: none; margin-top: 30px; background: #fff9f0; border-radius: 32px; padding: 20px;">
+            <!-- 直击灵魂的主题区域 -->
+            <div class="hero">
+                <h1>👼 微光同行者</h1>
+                <div class="soul-question">“你愿意成为心镜的守护者吗？”</div>
+                <div class="sub">每一份支持都能让心镜走得更远 · 你的微光，照亮他人</div>
+            </div>
+
+            <!-- 微光同行者内容 -->
+            <div class="post-card">
+                <h3>成为微光同行者</h3>
+                <img src="/static/图.jpg" alt="微光同行者" style="max-width: 100%; border-radius: 16px; margin-bottom: 20px;">
+                <div class="angel-message">
+                    <h4>每一份善意，都是照进角落的光</h4>
+                    <h5>资金去向</h5>
+                    <ul>
+                        <li>50% 用于维持"心镜"服务器运营（让更多人免费、流畅地完成测试）</li>
+                        <li>50% 通过腾讯公益平台，定向支持山区留守儿童与流浪动物救助</li>
+                    </ul>
+                    <h5>你的回报</h5>
+                    <ul>
+                        <li>你的网名将永久显示在"善行榜"上（可勾选匿名）</li>
+                        <li>你将获得一枚专属"微光守护者"勋章（展示在你的测试结果页）</li>
+                    </ul>
+                    <h5>金额随心，善意无价</h5>
+                    <p>哪怕只是一杯奶茶钱，也能让这份善意的网络多连接一个人。</p>
+                    <p>长按识别下方二维码，选择"添加备注"留下你的网名（我们将按此公示）。</p>
+                </div>
+            </div>
+            <footer>👼 你的支持，让心镜更明亮</footer>
+        </div>
     </div>
 
     <!-- 模态框：选择轨迹回放 -->
     <div id="tracesModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><div id="tracesList"></div></div></div>
     <!-- 模态框：道德日记保存 -->
-    <div id="journalModal" class="modal" style="display:none;"><div class="modal-content"><textarea id="journalNote" placeholder="写下你的感悟..."></textarea><button id="confirmJournal">保存</button></div></div>
+    <div id="journalModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><textarea id="journalNote" placeholder="写下你的感悟..."></textarea><button id="confirmJournal">保存</button></div></div>
     <!-- 模态框：查看日记 -->
     <div id="viewJournalModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><div id="journalEntries"></div></div></div>
     <!-- 动态追问模态框 -->
@@ -268,8 +379,8 @@
     <div id="storyModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3 id="storyTitle"></h3><p id="storyContent"></p><button id="storyClose">关闭</button></div></div>
     <!-- 时间胶囊模态框 -->
     <div id="timeCapsuleModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3>存入时间胶囊</h3><div class="time-capsule-form"><div class="form-group"><label for="timeCapsuleEmail">邮箱 (一年后提醒)</label><input type="email" id="timeCapsuleEmail" required></div><div class="form-group"><label for="timeCapsuleMood">心情标签</label><input type="text" id="timeCapsuleMood" placeholder="例如：平静, 反思, 期待"></div><div class="form-group"><label for="timeCapsuleNote">留言 (可选)</label><textarea id="timeCapsuleNote" placeholder="给一年后的自己说点什么..."></textarea></div><button id="saveTimeCapsuleBtn">保存时间胶囊</button></div></div></div>
-    <!-- 天使投资人模态框 -->
-    <div id="angelInvestorModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3>👼 天使投资人</h3><div class="angel-investor-content"><img src="/static/图.jpg" alt="天使投资人" style="max-width: 100%; border-radius: 16px; margin-bottom: 20px;"><div class="angel-message"><p>亲爱的朋友，</p><p>你是这个世界的天使投资人，用你的善良、正直和爱心投资着每一个相遇的灵魂。</p><p>你的每一次选择，都是对美好世界的投票；你的每一次善行，都是对未来的投资。</p><p>在这个充满挑战的世界里，你的存在本身就是一种光，照亮了身边的每一个角落。</p><p>谢谢你，因为有你，这个世界变得更加温暖、更加美好。</p><p>愿你继续做自己的天使，也成为他人的天使。</p><p>—— 心镜团队</p></div></div></div></div>
+    <!-- 微光同行者模态框 -->
+    <div id="angelInvestorModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3>👼 微光同行者</h3><div class="angel-investor-content"><img src="/static/图.jpg" alt="微光同行者" style="max-width: 100%; border-radius: 16px; margin-bottom: 20px;"><div class="angel-message"><h4>每一份善意，都是照进角落的光</h4><h5>资金去向</h5><ul><li>50% 用于维持"心镜"服务器运营（让更多人免费、流畅地完成测试）</li><li>50% 通过腾讯公益平台，定向支持山区留守儿童与流浪动物救助</li></ul><h5>你的回报</h5><ul><li>你的网名将永久显示在"善行榜"上（可勾选匿名）</li><li>你将获得一枚专属"微光守护者"勋章（展示在你的测试结果页）</li></ul><h5>金额随心，善意无价</h5><p>哪怕只是一杯奶茶钱，也能让这份善意的网络多连接一个人。</p><p>长按识别下方二维码，选择"添加备注"留下你的网名（我们将按此公示）。</p></div></div></div></div>
     <!-- 社区评论模态框 -->
     <div id="communityModal" class="modal" style="display:none;"><div class="modal-content"><span class="close">&times;</span><h3>💬 社区讨论</h3><div class="community-content"><div class="comment-form"><h4>分享你的想法</h4><textarea id="commentContent" placeholder="说说你对这次测试结果的感受..." style="width: 100%; min-height: 100px; padding: 12px; border-radius: 16px; border: 1px solid #ddd; resize: vertical;"></textarea><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;"><input type="text" id="commentName" placeholder="昵称（选填）" style="flex: 1; padding: 8px; border-radius: 16px; border: 1px solid #ddd; margin-right: 10px;"><button id="submitComment" style="padding: 8px 16px; border-radius: 16px; border: none; background: #3b82f6; color: white; font-weight: bold; cursor: pointer;">发布</button></div></div><div class="comments-list" id="commentsList" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;"><h4>社区评论</h4><div id="commentsContainer"></div></div></div></div></div>
     <!-- 个性化推荐模态框 -->

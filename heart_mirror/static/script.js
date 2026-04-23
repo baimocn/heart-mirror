@@ -724,7 +724,266 @@ const CELEBRITIES = [
         description: '中国著名医学专家，抗疫英雄，展现了专业精神和社会责任感'
     },
     
-    // 虚构角色
+    // 新增现实人物 - 科学家和发明家
+    {
+        name: '牛顿',
+        scores: [65, 70, 80, 60, 95, 40],
+        description: '英国物理学家和数学家，万有引力定律的发现者，经典力学的奠基者'
+    },
+    {
+        name: '达尔文',
+        scores: [70, 65, 75, 60, 90, 35],
+        description: '英国生物学家，进化论的创立者，改变了人类对生命起源的理解'
+    },
+    {
+        name: '爱迪生',
+        scores: [60, 75, 50, 65, 95, 50],
+        description: '美国发明家，电灯的发明者，拥有1000多项专利，推动了电气时代的到来'
+    },
+    {
+        name: '特斯拉',
+        scores: [65, 60, 45, 55, 95, 45],
+        description: '塞尔维亚裔美国发明家，交流电系统的发明者，现代电力系统的奠基者'
+    },
+    {
+        name: '霍金',
+        scores: [70, 75, 60, 70, 90, 30],
+        description: '英国理论物理学家，黑洞理论的重要贡献者，身残志坚的科学典范'
+    },
+    {
+        name: '屠呦呦',
+        scores: [80, 85, 70, 75, 85, 40],
+        description: '中国药学家，青蒿素的发现者，首位获得诺贝尔奖的中国本土科学家'
+    },
+    {
+        name: '袁隆平',
+        scores: [85, 90, 65, 80, 80, 35],
+        description: '中国杂交水稻之父，解决了全球粮食问题，展现了科学家的社会责任感'
+    },
+    
+    // 新增现实人物 - 艺术家和文学家
+    {
+        name: '莎士比亚',
+        scores: [75, 80, 60, 90, 70, 45],
+        description: '英国文艺复兴时期剧作家和诗人，被誉为英国文学史上最杰出的戏剧家'
+    },
+    {
+        name: '贝多芬',
+        scores: [70, 75, 55, 85, 70, 50],
+        description: '德国作曲家，古典音乐的代表人物，失聪后仍创作了许多不朽作品'
+    },
+    {
+        name: '梵高',
+        scores: [60, 70, 40, 90, 65, 40],
+        description: '荷兰后印象派画家，《星夜》的创作者，展现了艺术的极致表现力'
+    },
+    {
+        name: '托尔斯泰',
+        scores: [85, 80, 70, 85, 65, 50],
+        description: '俄国文学家，《战争与和平》的作者，深刻探讨人性和社会问题'
+    },
+    {
+        name: '鲁迅',
+        scores: [90, 75, 65, 80, 70, 60],
+        description: '中国现代文学奠基人，以笔为剑，批判社会黑暗，唤醒民族觉醒'
+    },
+    {
+        name: '毕加索',
+        scores: [65, 60, 35, 75, 80, 40],
+        description: '西班牙画家，立体主义的创始人，20世纪最具影响力的艺术家之一'
+    },
+    {
+        name: '莫扎特',
+        scores: [70, 80, 50, 75, 75, 30],
+        description: '奥地利作曲家，古典音乐神童，创作了大量经典音乐作品'
+    },
+    
+    // 新增现实人物 - 政治家和社会活动家
+    {
+        name: '林肯',
+        scores: [95, 85, 80, 80, 75, 55],
+        description: '美国第16任总统，废除奴隶制，领导北方赢得南北战争，维护国家统一'
+    },
+    {
+        name: '罗斯福',
+        scores: [85, 80, 75, 75, 85, 50],
+        description: '美国第32任总统，实施新政应对大萧条，领导美国参加二战'
+    },
+    {
+        name: '丘吉尔',
+        scores: [85, 75, 70, 65, 90, 70],
+        description: '英国首相，领导英国在二战中抵抗纳粹德国，被誉为最伟大的英国人之一'
+    },
+    {
+        name: '曼德拉',
+        scores: [85, 90, 60, 80, 70, 45],
+        description: '南非前总统，反种族隔离斗士，展现了宽恕与和解的力量'
+    },
+    {
+        name: '撒切尔夫人',
+        scores: [80, 65, 85, 60, 85, 65],
+        description: '英国首位女首相，推行新自由主义经济政策，被称为"铁娘子"'
+    },
+    {
+        name: '昂山素季',
+        scores: [90, 85, 65, 85, 60, 40],
+        description: '缅甸政治家，民主运动领袖，诺贝尔和平奖获得者，为民主和人权而奋斗'
+    },
+    {
+        name: '纳尔逊·曼德拉',
+        scores: [85, 90, 60, 80, 70, 45],
+        description: '南非前总统，反种族隔离斗士，展现了宽恕与和解的力量'
+    },
+    
+    // 新增现实人物 - 企业家和商业领袖
+    {
+        name: '乔布斯',
+        scores: [70, 65, 55, 60, 95, 55],
+        description: '苹果公司创始人，创新设计理念的引领者，改变了个人电脑和手机行业'
+    },
+    {
+        name: '扎克伯格',
+        scores: [65, 70, 60, 70, 90, 45],
+        description: 'Facebook创始人，社交媒体的先驱，推动了全球信息共享'
+    },
+    {
+        name: '贝佐斯',
+        scores: [60, 75, 65, 65, 95, 50],
+        description: '亚马逊创始人，电子商务的开创者，世界首富之一'
+    },
+    {
+        name: '任正非',
+        scores: [75, 80, 70, 75, 90, 55],
+        description: '华为创始人，带领华为成为全球领先的通信技术公司'
+    },
+    {
+        name: '稻盛和夫',
+        scores: [80, 90, 85, 80, 85, 40],
+        description: '日本企业家，京瓷和KDDI创始人，经营哲学的倡导者'
+    },
+    {
+        name: '李嘉诚',
+        scores: [70, 75, 80, 65, 95, 45],
+        description: '香港企业家，长江实业创始人，亚洲首富之一，著名慈善家'
+    },
+    {
+        name: '马云',
+        scores: [75, 80, 65, 75, 95, 40],
+        description: '阿里巴巴创始人，企业家和慈善家，将商业创新与社会责任相结合'
+    },
+    
+    // 新增现实人物 - 体育明星
+    {
+        name: '乔丹',
+        scores: [85, 65, 70, 60, 95, 60],
+        description: '美国篮球运动员，NBA历史上最伟大的球员之一，六次总冠军获得者'
+    },
+    {
+        name: '梅西',
+        scores: [80, 75, 65, 80, 90, 45],
+        description: '阿根廷足球运动员，七次金球奖获得者，被誉为当代最伟大的足球运动员'
+    },
+    {
+        name: '费德勒',
+        scores: [85, 80, 75, 75, 85, 40],
+        description: '瑞士网球运动员，20次大满贯冠军，网球历史上最伟大的球员之一'
+    },
+    {
+        name: '博尔特',
+        scores: [75, 70, 60, 65, 95, 50],
+        description: '牙买加短跑运动员，世界纪录保持者，被誉为"闪电"'
+    },
+    {
+        name: '李宁',
+        scores: [80, 85, 70, 75, 85, 45],
+        description: '中国体操运动员，奥运冠军，李宁品牌创始人，体育产业的领军人物'
+    },
+    {
+        name: '姚明',
+        scores: [85, 80, 75, 85, 75, 40],
+        description: '中国篮球运动员，NBA首位外籍状元，促进了中美篮球文化交流'
+    },
+    {
+        name: 'C罗',
+        scores: [85, 70, 65, 65, 95, 55],
+        description: '葡萄牙足球运动员，五次金球奖获得者，职业生涯进球数历史第一'
+    },
+    
+    // 新增现实人物 - 娱乐界名人
+    {
+        name: '卓别林',
+        scores: [75, 85, 50, 90, 70, 35],
+        description: '英国喜剧演员，默片时代的代表人物，以幽默和社会批判著称'
+    },
+    {
+        name: '赫本',
+        scores: [80, 85, 65, 90, 75, 30],
+        description: '英国女演员，奥斯卡影后，著名慈善大使，以优雅和 humanitarianism著称'
+    },
+    {
+        name: '成龙',
+        scores: [85, 80, 70, 75, 85, 50],
+        description: '中国动作演员，国际功夫巨星，慈善家，以惊险特技和喜剧元素著称'
+    },
+    {
+        name: '斯皮尔伯格',
+        scores: [70, 75, 65, 80, 90, 45],
+        description: '美国导演，奥斯卡最佳导演，《侏罗纪公园》《辛德勒的名单》等经典影片的创作者'
+    },
+    {
+        name: '周杰伦',
+        scores: [75, 70, 55, 75, 85, 40],
+        description: '台湾歌手，亚洲流行音乐天王，创作了许多经典歌曲'
+    },
+    {
+        name: '泰勒·斯威夫特',
+        scores: [80, 85, 60, 85, 85, 45],
+        description: '美国歌手和词曲作者，多次获得格莱美奖，全球流行音乐巨星'
+    },
+    {
+        name: '汤姆·汉克斯',
+        scores: [85, 80, 70, 85, 75, 40],
+        description: '美国演员，两届奥斯卡影帝，以塑造真实可信的角色著称'
+    },
+    
+    // 新增现实人物 - 历史人物
+    {
+        name: '秦始皇',
+        scores: [90, 40, 95, 30, 95, 90],
+        description: '中国历史上第一个皇帝，统一六国，建立中央集权制度'
+    },
+    {
+        name: '汉武帝',
+        scores: [85, 55, 80, 50, 90, 75],
+        description: '中国西汉皇帝，开疆拓土，推行"罢黜百家，独尊儒术"'
+    },
+    {
+        name: '凯撒',
+        scores: [90, 50, 70, 40, 95, 85],
+        description: '罗马共和国末期的军事政治家，扩大了罗马领土，为罗马帝国奠定基础'
+    },
+    {
+        name: '亚历山大大帝',
+        scores: [85, 45, 65, 35, 95, 80],
+        description: '马其顿国王，建立了横跨欧亚非的帝国，促进了东西方文化交流'
+    },
+    {
+        name: '成吉思汗',
+        scores: [90, 40, 60, 30, 95, 90],
+        description: '蒙古帝国的奠基者，征服了欧亚大陆的广大地区'
+    },
+    {
+        name: '伊丽莎白一世',
+        scores: [85, 65, 80, 60, 90, 65],
+        description: '英国女王，伊丽莎白时代的开创者，使英国成为海上强国'
+    },
+    {
+        name: '康熙',
+        scores: [85, 70, 85, 65, 85, 60],
+        description: '中国清朝皇帝，开创了康乾盛世，统一台湾，抵御沙俄侵略'
+    },
+    
+    // 新增虚构角色
     {
         name: '哈利·波特',
         scores: [85, 80, 60, 85, 70, 65],
@@ -769,6 +1028,157 @@ const CELEBRITIES = [
         name: '小丑',
         scores: [30, 20, 10, 40, 85, 95],
         description: 'DC漫画反派，混乱和无政府主义的象征，挑战社会秩序'
+    },
+    // 新增虚构角色
+    {
+        name: '超人',
+        scores: [95, 90, 80, 85, 75, 60],
+        description: 'DC漫画超级英雄，象征真理、正义和美国精神，拥有超人类能力'
+    },
+    {
+        name: '钢铁侠',
+        scores: [75, 65, 60, 65, 95, 65],
+        description: '漫威漫画超级英雄，天才发明家，以科技和财富对抗邪恶'
+    },
+    {
+        name: '雷神',
+        scores: [85, 75, 70, 70, 80, 70],
+        description: '漫威漫画超级英雄，阿斯加德王子，拥有雷神之锤，保护地球'
+    },
+    {
+        name: '绿巨人',
+        scores: [70, 60, 40, 75, 85, 80],
+        description: '漫威漫画超级英雄，因伽马射线照射获得变身能力，力量无穷'
+    },
+    {
+        name: '神奇女侠',
+        scores: [90, 85, 75, 80, 70, 65],
+        description: 'DC漫画超级英雄，亚马逊公主，象征和平与正义'
+    },
+    {
+        name: '闪电侠',
+        scores: [80, 75, 65, 75, 80, 55],
+        description: 'DC漫画超级英雄，拥有超高速移动能力，保护中心城'
+    },
+    {
+        name: '绿箭侠',
+        scores: [85, 70, 75, 65, 85, 75],
+        description: 'DC漫画超级英雄，以弓箭为武器，打击犯罪，守护星城'
+    },
+    {
+        name: '鹰眼',
+        scores: [80, 75, 65, 70, 85, 65],
+        description: '漫威漫画超级英雄，神箭手，复仇者联盟成员'
+    },
+    {
+        name: '黑豹',
+        scores: [85, 80, 85, 75, 80, 65],
+        description: '漫威漫画超级英雄，瓦坎达国王，拥有振金战衣，保护国家和世界'
+    },
+    {
+        name: '绯红女巫',
+        scores: [75, 70, 55, 80, 85, 60],
+        description: '漫威漫画超级英雄，拥有混沌魔法能力，复仇者联盟成员'
+    },
+    {
+        name: '蚁人',
+        scores: [70, 75, 60, 70, 85, 50],
+        description: '漫威漫画超级英雄，能够改变身体大小，利用蚂蚁进行侦查和战斗'
+    },
+    {
+        name: '银河护卫队星爵',
+        scores: [75, 65, 50, 65, 85, 55],
+        description: '漫威漫画超级英雄，银河护卫队队长，幽默风趣，守护宇宙和平'
+    },
+    {
+        name: '死侍',
+        scores: [60, 50, 30, 60, 90, 75],
+        description: '漫威漫画反英雄，拥有自愈能力，幽默诙谐，行事风格不羁'
+    },
+    {
+        name: '灭霸',
+        scores: [40, 20, 30, 20, 95, 90],
+        description: '漫威漫画反派，为了宇宙平衡，试图消灭一半生命'
+    },
+    {
+        name: '达克赛德',
+        scores: [20, 10, 20, 10, 95, 95],
+        description: 'DC漫画反派，天启星统治者，试图征服宇宙，传播黑暗'
+    },
+    {
+        name: '洛基',
+        scores: [60, 40, 30, 50, 85, 70],
+        description: '漫威漫画角色，雷神的弟弟，诡计之神，亦正亦邪'
+    },
+    {
+        name: '猫女',
+        scores: [65, 55, 40, 60, 85, 65],
+        description: 'DC漫画角色，蝙蝠侠的对手和恋人，身手敏捷，擅长盗窃'
+    },
+    {
+        name: '毒藤女',
+        scores: [50, 60, 20, 70, 75, 60],
+        description: 'DC漫画反派，拥有控制植物的能力，环保主义者，与蝙蝠侠为敌'
+    },
+    {
+        name: '双面人',
+        scores: [40, 30, 20, 40, 80, 85],
+        description: 'DC漫画反派，前检察官，因毁容而变得善恶不定，依赖硬币决定行动'
+    },
+    {
+        name: '企鹅人',
+        scores: [55, 40, 30, 35, 85, 65],
+        description: 'DC漫画反派， Gotham City 犯罪头目，以企鹅为标志，智慧型罪犯'
+    },
+    {
+        name: '万磁王',
+        scores: [70, 60, 40, 65, 85, 75],
+        description: '漫威漫画角色，变种人领袖，拥有控制磁场的能力，为变种人权益而战'
+    },
+    {
+        name: 'X教授',
+        scores: [85, 80, 70, 90, 75, 40],
+        description: '漫威漫画角色，X战警创始人，拥有心灵感应能力，倡导人类与变种人和平共处'
+    },
+    {
+        name: '金刚狼',
+        scores: [75, 65, 50, 60, 85, 80],
+        description: '漫威漫画超级英雄，X战警成员，拥有自愈能力和艾德曼合金爪'
+    },
+    {
+        name: '凤凰女',
+        scores: [70, 75, 55, 70, 80, 60],
+        description: '漫威漫画超级英雄，X战警成员，拥有凤凰之力，强大的心灵感应和念力'
+    },
+    {
+        name: '蜘蛛侠（迈尔斯·莫拉莱斯）',
+        scores: [85, 80, 65, 80, 75, 55],
+        description: '漫威漫画超级英雄，新一代蜘蛛侠，多元宇宙中的蜘蛛侠之一'
+    },
+    {
+        name: '超女',
+        scores: [90, 85, 75, 80, 70, 55],
+        description: 'DC漫画超级英雄，超人的堂妹，拥有与超人相似的能力'
+    },
+    {
+        name: '蝙蝠女',
+        scores: [85, 75, 70, 75, 80, 65],
+        description: 'DC漫画超级英雄，蝙蝠侠的助手，擅长格斗和侦探工作'
+    },
+    {
+        name: '罗宾',
+        scores: [80, 75, 65, 70, 75, 60],
+        description: 'DC漫画超级英雄，蝙蝠侠的助手，年轻的 crime-fighter'
+    },
+    {
+        name: '钢骨',
+        scores: [75, 70, 65, 65, 85, 55],
+        description: 'DC漫画超级英雄，正义联盟成员，半人半机器，拥有高科技能力'
+    },
+    {
+        name: '海王',
+        scores: [80, 75, 70, 75, 80, 65],
+        description: 'DC漫画超级英雄，亚特兰蒂斯国王，拥有控制海洋生物和水下呼吸的能力'
     }
 ];
 
@@ -1494,12 +1904,33 @@ async function finish() {
         
         // 绑定复制镜像编号按钮事件
         document.getElementById('copyMirrorIdBtn').onclick = function() {
-            navigator.clipboard.writeText(fingerprint).then(function() {
-                showFeedback('镜像编号已复制到剪贴板', 'success');
-            }).catch(function(error) {
-                console.error('复制失败', error);
-                showFeedback('复制失败', 'error');
-            });
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(fingerprint).then(function() {
+                    showFeedback('镜像编号已复制到剪贴板', 'success');
+                }).catch(function(error) {
+                    console.error('复制失败', error);
+                    showFeedback('复制失败', 'error');
+                });
+            } else {
+                // 回退方案：使用传统的复制方法
+                const textArea = document.createElement('textarea');
+                textArea.value = fingerprint;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showFeedback('镜像编号已复制到剪贴板', 'success');
+                } catch (error) {
+                    console.error('复制失败', error);
+                    showFeedback('复制失败', 'error');
+                } finally {
+                    document.body.removeChild(textArea);
+                }
+            }
         };
         
         // 绑定镜像编号查询按钮事件
@@ -1615,44 +2046,117 @@ async function finish() {
         loadDonationList();
         
         // 绑定按钮
-        document.getElementById('showTracesBtn').onclick = showTracesModal;
-        document.getElementById('saveJournalBtn').onclick = function() { openJournalModal(); };
-        document.getElementById('viewJournalBtn').onclick = function() { viewJournal(); };
-        document.getElementById('shareCardBtn').onclick = generateMoralCard;
-        document.getElementById('restartBtn').onclick = function() {
-            // 重置所有全局变量
-            currentExam = [];
-            currentQuestionIndex = 0;
-            answers = [];
-            questionStartTime = [];
-            questionSwitchCount = [];
-            currentOptionSelected = [];
-            patternsDetected = [];
-            // 重新开始
-            document.getElementById('resultPanel').style.display = 'none';
-            document.getElementById('quizPanel').style.display = 'block';
-            document.querySelector('.app-container').className = 'app-container default_mood';
-            buildRandomExam();   // 重新组卷
-            renderQuestion();    // 重新渲染第一题
-            updateStats();
-        };
-        document.getElementById('messagesBtn').onclick = toggleMessages;
-        document.getElementById('showHistoryBtn').onclick = showHistoryModal;
-        document.getElementById('flowsBtn').onclick = function() {
-            window.location.href = '/flows';
-        };
-        document.getElementById('timeCapsuleBtn').onclick = openTimeCapsuleModal;
-        document.getElementById('saveTimeCapsuleBtn').onclick = saveTimeCapsule;
-        document.getElementById('dilemmasBtn').onclick = function() {
-            window.location.href = '/dilemmas';
-        };
-        document.getElementById('tasksBtn').onclick = function() {
-            window.location.href = '/tasks';
-        };
-        document.getElementById('angelInvestorBtn').onclick = function() {
-            document.getElementById('angelInvestorModal').style.display = 'flex';
-            document.querySelector('#angelInvestorModal .close').onclick = function() {
-                document.getElementById('angelInvestorModal').style.display = 'none';
+        const showTracesBtn = document.getElementById('showTracesBtn');
+        if (showTracesBtn) {
+            showTracesBtn.onclick = showTracesModal;
+        }
+        
+        const saveJournalBtn = document.getElementById('saveJournalBtn');
+        if (saveJournalBtn) {
+            saveJournalBtn.onclick = function() { openJournalModal(); };
+        }
+        // 检查并绑定各个按钮的点击事件
+        const viewJournalBtn = document.getElementById('viewJournalBtn');
+        if (viewJournalBtn) {
+            viewJournalBtn.onclick = function() { viewJournal(); };
+        }
+        
+        const shareCardBtn = document.getElementById('shareCardBtn');
+        if (shareCardBtn) {
+            shareCardBtn.onclick = generateMoralCard;
+        }
+        
+        const restartBtn = document.getElementById('restartBtn');
+        if (restartBtn) {
+            restartBtn.onclick = function() {
+                // 重置所有全局变量
+                currentExam = [];
+                currentQuestionIndex = 0;
+                answers = [];
+                questionStartTime = [];
+                questionSwitchCount = [];
+                currentOptionSelected = [];
+                patternsDetected = [];
+                // 重新开始
+                document.getElementById('resultPanel').style.display = 'none';
+                document.getElementById('quizPanel').style.display = 'block';
+                document.querySelector('.app-container').className = 'app-container default_mood';
+                buildRandomExam();   // 重新组卷
+                renderQuestion();    // 重新渲染第一题
+                updateStats();
+            };
+        }
+        
+        const messagesBtn = document.getElementById('messagesBtn');
+        if (messagesBtn) {
+            messagesBtn.onclick = toggleMessages;
+        }
+        
+        const showHistoryBtn = document.getElementById('showHistoryBtn');
+        if (showHistoryBtn) {
+            showHistoryBtn.onclick = showHistoryModal;
+        }
+        
+        const timeCapsuleBtn = document.getElementById('timeCapsuleBtn');
+        if (timeCapsuleBtn) {
+            timeCapsuleBtn.onclick = function() {
+                // 隐藏其他区域
+                document.getElementById('messagesSection').style.display = 'none';
+                document.getElementById('dilemmasSection').style.display = 'none';
+                document.getElementById('tasksSection').style.display = 'none';
+                document.getElementById('angelInvestorSection').style.display = 'none';
+                // 显示时间胶囊区域
+                const timeCapsuleSection = document.getElementById('timeCapsuleSection');
+                timeCapsuleSection.style.display = 'block';
+                // 绑定保存按钮点击事件
+                const saveTimeCapsuleBtn = document.getElementById('saveTimeCapsuleBtn');
+                if (saveTimeCapsuleBtn) {
+                    saveTimeCapsuleBtn.onclick = saveTimeCapsule;
+                }
+            };
+        }
+        
+        const saveTimeCapsuleBtn = document.getElementById('saveTimeCapsuleBtn');
+        if (saveTimeCapsuleBtn) {
+            saveTimeCapsuleBtn.onclick = saveTimeCapsule;
+        }
+        
+        const dilemmasBtn = document.getElementById('dilemmasBtn');
+        if (dilemmasBtn) {
+            dilemmasBtn.onclick = function() {
+                // 隐藏其他区域
+                document.getElementById('messagesSection').style.display = 'none';
+                document.getElementById('timeCapsuleSection').style.display = 'none';
+                document.getElementById('tasksSection').style.display = 'none';
+                document.getElementById('angelInvestorSection').style.display = 'none';
+                // 显示道德困惑墙区域
+                document.getElementById('dilemmasSection').style.display = 'block';
+            };
+        }
+        
+        const tasksBtn = document.getElementById('tasksBtn');
+        if (tasksBtn) {
+            tasksBtn.onclick = function() {
+                // 隐藏其他区域
+                document.getElementById('messagesSection').style.display = 'none';
+                document.getElementById('timeCapsuleSection').style.display = 'none';
+                document.getElementById('dilemmasSection').style.display = 'none';
+                document.getElementById('angelInvestorSection').style.display = 'none';
+                // 显示每日微行动区域
+                document.getElementById('tasksSection').style.display = 'block';
+            };
+        }
+        
+        const angelInvestorBtn = document.getElementById('angelInvestorBtn');
+        if (angelInvestorBtn) {
+            angelInvestorBtn.onclick = function() {
+                // 隐藏其他区域
+                document.getElementById('messagesSection').style.display = 'none';
+                document.getElementById('timeCapsuleSection').style.display = 'none';
+                document.getElementById('dilemmasSection').style.display = 'none';
+                document.getElementById('tasksSection').style.display = 'none';
+                // 显示微光同行者区域
+                document.getElementById('angelInvestorSection').style.display = 'block';
             };
         };
         
@@ -1707,38 +2211,7 @@ async function finish() {
             });
         }
         
-        // 日记功能Tab切换
-        const journalBtn = document.getElementById('journalBtn');
-        const journalTabs = document.getElementById('journalTabs');
-        if (journalBtn && journalTabs) {
-            journalBtn.onclick = function() {
-                if (journalTabs.style.display === 'none' || journalTabs.style.display === '') {
-                    journalTabs.style.display = 'block';
-                } else {
-                    journalTabs.style.display = 'none';
-                }
-            };
-            
-            // 点击其他区域关闭菜单
-            document.addEventListener('click', function(event) {
-                if (!journalBtn.contains(event.target) && !journalTabs.contains(event.target)) {
-                    journalTabs.style.display = 'none';
-                }
-            });
-            
-            // Tab切换功能
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            tabBtns.forEach(function(btn) {
-                btn.onclick = function() {
-                    // 移除所有Tab的active类
-                    tabBtns.forEach(function(tabBtn) {
-                        tabBtn.classList.remove('active');
-                    });
-                    // 添加当前Tab的active类
-                    this.classList.add('active');
-                };
-            });
-        }
+
         
         console.log('finish函数执行完成');
     } catch (error) {
@@ -1752,6 +2225,95 @@ async function finish() {
         document.getElementById('personalityDesc').innerText = '测试结果计算过程中遇到了一些问题，但测试已完成。';
     }
 };
+
+// 锚点功能
+console.log('锚点功能代码开始执行');
+function initAnchorFeature() {
+    console.log('初始化锚点功能');
+    const anchorConfirmBtn = document.getElementById('anchorConfirmBtn');
+    const anchorInput = document.getElementById('anchorInput');
+    const anchorFeedback = document.getElementById('anchorFeedback');
+    
+    console.log('锚点功能元素:', {
+        anchorConfirmBtn: anchorConfirmBtn,
+        anchorInput: anchorInput,
+        anchorFeedback: anchorFeedback
+    });
+    
+    if (anchorConfirmBtn && anchorInput && anchorFeedback) {
+        console.log('锚点功能元素加载成功，绑定点击事件');
+        anchorConfirmBtn.onclick = async function() {
+            console.log('锚点确认按钮被点击');
+            const accountNumber = anchorInput.value.trim();
+            
+            if (!accountNumber) {
+                showAnchorFeedback('请输入数字账号', 'error');
+                return;
+            }
+            
+            if (!/^\d+$/.test(accountNumber)) {
+                showAnchorFeedback('账号必须是数字', 'error');
+                return;
+            }
+            
+            try {
+                console.log('开始锚点操作，账号:', accountNumber, '设备ID:', deviceId);
+                const response = await fetch('/api/anchor', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        account_number: accountNumber,
+                        device_id: deviceId
+                    })
+                });
+                
+                console.log('锚点操作响应状态:', response.status);
+                const data = await response.json();
+                console.log('锚点操作响应数据:', data);
+                
+                if (response.ok) {
+                    // 存储用户信息到localStorage
+                    localStorage.setItem('anchor_user', JSON.stringify(data.user));
+                    showAnchorFeedback(data.message, 'success');
+                } else {
+                    showAnchorFeedback(data.error || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('锚点操作失败:', error);
+                showAnchorFeedback('网络错误，请稍后重试', 'error');
+            }
+        };
+    } else {
+        console.log('锚点功能元素加载失败');
+    }
+}
+console.log('锚点功能代码执行完成');
+
+function showAnchorFeedback(message, type) {
+    // 使用 alert() 函数来显示反馈信息
+    alert(message);
+    
+    const anchorFeedback = document.getElementById('anchorFeedback');
+    if (anchorFeedback) {
+        anchorFeedback.textContent = message;
+        anchorFeedback.style.display = 'block';
+        
+        if (type === 'success') {
+            anchorFeedback.style.backgroundColor = '#d4edda';
+            anchorFeedback.style.color = '#155724';
+        } else {
+            anchorFeedback.style.backgroundColor = '#f8d7da';
+            anchorFeedback.style.color = '#721c24';
+        }
+        
+        // 3秒后隐藏反馈
+        setTimeout(() => {
+            anchorFeedback.style.display = 'none';
+        }, 3000);
+    }
+}
 
 // 加载个性化推荐
 async function loadRecommendations() {
@@ -2021,87 +2583,7 @@ function showTracesModal() {
     }
 }
 
-// 打开道德日记模态框
-function openJournalModal() {
-    const modal = document.getElementById('journalModal');
-    const journalNote = document.getElementById('journalNote');
-    if (journalNote) {
-        journalNote.value = '';
-    }
-    modal.style.display = 'flex';
-    const closeBtn = document.querySelector('#journalModal .close');
-    if (closeBtn) {
-        closeBtn.onclick = function() {
-            modal.style.display = 'none';
-        };
-    }
-}
 
-// 保存道德日记
-async function saveJournal() {
-    try {
-        const journalNote = document.getElementById('journalNote');
-        if (!journalNote) {
-            showFeedback('日记输入框未找到', 'error');
-            return;
-        }
-        const note = journalNote.value.trim();
-        if (!note) {
-            showFeedback('请输入日记内容', 'warning');
-            return;
-        }
-        const snapshot = JSON.stringify({ title: finalTitle, scores: finalScores });
-        const res = await fetch('/api/journal', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ device_id: deviceId, note: note, snapshot: snapshot })
-        });
-        if (res.ok) {
-            showFeedback('日记保存成功', 'success');
-            document.getElementById('journalModal').style.display = 'none';
-        } else {
-            showFeedback('日记保存失败', 'error');
-        }
-    } catch (error) {
-        console.error('保存日记失败', error);
-        showFeedback('日记保存失败', 'error');
-    }
-}
-
-// 查看道德日记
-async function viewJournal() {
-    try {
-        const res = await fetch('/api/journal?device_id=' + deviceId);
-        const journal = await res.json();
-        const modal = document.getElementById('viewJournalModal');
-        const container = document.getElementById('journalEntries');
-        if (journal.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">还没有日记记录</p>';
-        } else {
-            let html = '';
-            journal.forEach(function(entry) {
-                const date = new Date(entry.created_at).toLocaleString('zh-CN');
-                html += `
-                    <div style="background: #f9f9f9; border-radius: 12px; padding: 15px; margin-bottom: 10px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <h4>${JSON.parse(entry.result_snapshot).title}</h4>
-                            <span style="font-size: 0.8rem; color: #666;">${date}</span>
-                        </div>
-                        <p>${entry.user_note}</p>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-        modal.style.display = 'flex';
-        document.querySelector('#viewJournalModal .close').onclick = function() {
-            modal.style.display = 'none';
-        };
-    } catch (error) {
-        console.error('查看日记失败', error);
-        showFeedback('查看日记失败', 'error');
-    }
-}
 
 // 生成分享海报
 async function generatePoster() {
@@ -2275,7 +2757,27 @@ async function submitDonation() {
 // 显示历史演化图
 async function showHistoryModal() {
     try {
-        const res = await fetch('/api/history?device_id=' + deviceId);
+        // 检查是否有锚点用户信息
+        const anchorUser = localStorage.getItem('anchor_user');
+        let url = '/api/history';
+        
+        if (anchorUser) {
+            try {
+                const user = JSON.parse(anchorUser);
+                if (user.id) {
+                    url += '?user_id=' + user.id;
+                } else {
+                    url += '?device_id=' + deviceId;
+                }
+            } catch (error) {
+                console.error('解析锚点用户信息失败:', error);
+                url += '?device_id=' + deviceId;
+            }
+        } else {
+            url += '?device_id=' + deviceId;
+        }
+        
+        const res = await fetch(url);
         const history = await res.json();
         const modal = document.getElementById('historyModal');
         if (history.length === 0) {
@@ -2351,8 +2853,19 @@ function getColor(index, alpha) {
 function toggleMessages() {
     const messagesSection = document.getElementById('messagesSection');
     if (messagesSection.style.display === 'none' || messagesSection.style.display === '') {
+        // 隐藏其他区域
+        document.getElementById('timeCapsuleSection').style.display = 'none';
+        document.getElementById('dilemmasSection').style.display = 'none';
+        document.getElementById('tasksSection').style.display = 'none';
+        document.getElementById('angelInvestorSection').style.display = 'none';
+        // 显示留言区域
         messagesSection.style.display = 'block';
         loadMessages();
+        // 绑定提交按钮点击事件
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+            submitBtn.onclick = postMessage;
+        }
     } else {
         messagesSection.style.display = 'none';
     }
@@ -2441,6 +2954,7 @@ async function likeMessage(id) {
 // 发布留言
 async function postMessage() {
     const content = document.getElementById('messageInput').value.trim();
+    const nickname = document.getElementById('nicknameInput').value.trim();
     if (!content) {
         showFeedback('请输入留言内容', 'warning');
         return;
@@ -2449,11 +2963,12 @@ async function postMessage() {
         const res = await fetch('/api/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: content, author: '匿名用户', device_id: deviceId })
+            body: JSON.stringify({ content: content, author: nickname || '匿名用户', device_id: deviceId })
         });
         if (res.ok) {
             showFeedback('留言发布成功', 'success');
             document.getElementById('messageInput').value = '';
+            document.getElementById('nicknameInput').value = '';
             loadMessages();
         } else {
             showFeedback('留言发布失败', 'error');
@@ -2668,6 +3183,8 @@ async function init() {
     initTheme();
     // 更新统计数据
     await updateStats();
+    // 初始化锚点功能
+    initAnchorFeature();
     // 绑定深度镜渊测试按钮（81题）
     document.getElementById('deepTestBtn').onclick = function() {
         document.querySelector('.opening-overlay').style.display = 'none';
