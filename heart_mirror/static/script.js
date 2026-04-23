@@ -3219,6 +3219,86 @@ async function init() {
     if (themeToggleBtn) {
         themeToggleBtn.onclick = toggleTheme;
     }
+    // 绑定公益行动下拉菜单
+    const charityActionBtn = document.getElementById('charityActionBtn');
+    const charityMenu = document.getElementById('charityMenu');
+    if (charityActionBtn && charityMenu) {
+        charityActionBtn.onclick = function() {
+            if (charityMenu.style.display === 'none' || charityMenu.style.display === '') {
+                charityMenu.style.display = 'flex';
+            } else {
+                charityMenu.style.display = 'none';
+            }
+        };
+        
+        // 点击其他区域关闭菜单
+        document.addEventListener('click', function(event) {
+            if (!charityActionBtn.contains(event.target) && !charityMenu.contains(event.target)) {
+                charityMenu.style.display = 'none';
+            }
+        });
+    }
+    // 绑定道德困惑墙按钮
+    const dilemmasBtn = document.getElementById('dilemmasBtn');
+    if (dilemmasBtn) {
+        dilemmasBtn.onclick = function() {
+            // 隐藏其他区域
+            document.getElementById('messagesSection').style.display = 'none';
+            document.getElementById('timeCapsuleSection').style.display = 'none';
+            document.getElementById('tasksSection').style.display = 'none';
+            document.getElementById('angelInvestorSection').style.display = 'none';
+            // 显示道德困惑墙区域
+            document.getElementById('dilemmasSection').style.display = 'block';
+        };
+    }
+    // 绑定每日微行动按钮
+    const tasksBtn = document.getElementById('tasksBtn');
+    if (tasksBtn) {
+        tasksBtn.onclick = function() {
+            // 隐藏其他区域
+            document.getElementById('messagesSection').style.display = 'none';
+            document.getElementById('timeCapsuleSection').style.display = 'none';
+            document.getElementById('dilemmasSection').style.display = 'none';
+            document.getElementById('angelInvestorSection').style.display = 'none';
+            // 显示每日微行动区域
+            document.getElementById('tasksSection').style.display = 'block';
+        };
+    }
+    // 绑定其他公益行动按钮
+    const messagesBtn = document.getElementById('messagesBtn');
+    if (messagesBtn) {
+        messagesBtn.onclick = toggleMessages;
+    }
+    const timeCapsuleBtn = document.getElementById('timeCapsuleBtn');
+    if (timeCapsuleBtn) {
+        timeCapsuleBtn.onclick = function() {
+            // 隐藏其他区域
+            document.getElementById('messagesSection').style.display = 'none';
+            document.getElementById('dilemmasSection').style.display = 'none';
+            document.getElementById('tasksSection').style.display = 'none';
+            document.getElementById('angelInvestorSection').style.display = 'none';
+            // 显示时间胶囊区域
+            const timeCapsuleSection = document.getElementById('timeCapsuleSection');
+            timeCapsuleSection.style.display = 'block';
+            // 绑定保存按钮点击事件
+            const saveTimeCapsuleBtn = document.getElementById('saveTimeCapsuleBtn');
+            if (saveTimeCapsuleBtn) {
+                saveTimeCapsuleBtn.onclick = saveTimeCapsule;
+            }
+        };
+    }
+    const angelInvestorBtn = document.getElementById('angelInvestorBtn');
+    if (angelInvestorBtn) {
+        angelInvestorBtn.onclick = function() {
+            // 隐藏其他区域
+            document.getElementById('messagesSection').style.display = 'none';
+            document.getElementById('timeCapsuleSection').style.display = 'none';
+            document.getElementById('dilemmasSection').style.display = 'none';
+            document.getElementById('tasksSection').style.display = 'none';
+            // 显示微光同行者区域
+            document.getElementById('angelInvestorSection').style.display = 'block';
+        };
+    }
 }
 
 // 留言数据
