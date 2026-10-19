@@ -1256,6 +1256,76 @@ img.lazy.loaded {
     color: #94a3b8;
 }
 
+/* 选择轨迹样式 */
+.traces-section {
+    padding: 20px;
+    margin-top: 20px;
+    background: #f5f5f5;
+    border-radius: 16px;
+}
+
+.traces-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #1e293b;
+}
+
+.trace-item {
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 10px;
+    transition: 0.2s;
+}
+
+.trace-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.trace-item.most-difficult {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+}
+
+/* 选择轨迹 - 深色模式 */
+.app-container.dark-mode .traces-section {
+    background: #1e293b;
+}
+
+.app-container.dark-mode .traces-section h3 {
+    color: #f8fafc;
+}
+
+.app-container.dark-mode .trace-item {
+    background: #334155;
+}
+
+.app-container.dark-mode .trace-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.app-container.dark-mode .trace-item.most-difficult {
+    background: #4a3728;
+    border-left: 4px solid #ffc107;
+}
+
+.app-container.dark-mode .trace-item textarea {
+    background: #475569;
+    border-color: #64748b;
+    color: #f8fafc;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .traces-section {
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .trace-item {
+        padding: 12px;
+    }
+}
+
 .app-container.dark-mode footer {
     color: #94a3b8;
 }
@@ -2194,4 +2264,520 @@ footer {
 .app-container.dark-mode .toggle-report-btn:hover {
     background: #60a5fa;
     color: white;
+}
+
+/* 历史演化展示区域样式 */
+.history-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.history-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.history-chart-container {
+    width: 100%;
+    height: 400px;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#historyTitles {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#historyTitles h4 {
+    margin-top: 0;
+    color: #333;
+}
+
+#historyTitles p {
+    margin: 8px 0;
+    color: #666;
+    line-height: 1.4;
+}
+
+.close-history-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #666;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+    align-self: flex-start;
+}
+
+.close-history-btn:hover {
+    background: #555;
+}
+
+/* 滚动条样式 */
+#historyTitles::-webkit-scrollbar {
+    width: 8px;
+}
+
+#historyTitles::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#historyTitles::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#historyTitles::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* 深色模式适配 */
+.app-container.dark-mode .history-section {
+    background: #334155;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.app-container.dark-mode .history-chart-container {
+    background: #1e293b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.app-container.dark-mode #historyTitles {
+    background: #1e293b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.app-container.dark-mode #historyTitles h4 {
+    color: #e2e8f0;
+}
+
+.app-container.dark-mode #historyTitles p {
+    color: #94a3b8;
+}
+
+.app-container.dark-mode .close-history-btn {
+    background: #475569;
+}
+
+.app-container.dark-mode .close-history-btn:hover {
+    background: #64748b;
+}
+
+.app-container.dark-mode #historyTitles::-webkit-scrollbar-track {
+    background: #334155;
+}
+
+.app-container.dark-mode #historyTitles::-webkit-scrollbar-thumb {
+    background: #64748b;
+}
+
+.app-container.dark-mode #historyTitles::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .history-section {
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .history-chart-container {
+        height: 300px;
+        padding: 15px;
+    }
+    
+    #historyTitles {
+        padding: 15px;
+        max-height: 250px;
+    }
+    
+    .close-history-btn {
+        align-self: center;
+        width: 100%;
+        max-width: 200px;
+    }
+}
+
+/* 道德困惑墙样式 */
+.dilemmas-section {
+    padding: 30px;
+}
+
+.dilemma-form {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dilemma-form h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #1e293b;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: 0.2s;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.char-count {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 5px;
+}
+
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.option-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.option-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: 0.2s;
+}
+
+.option-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.remove-option {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.remove-option:hover {
+    background: #dc2626;
+}
+
+.add-option {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-bottom: 20px;
+}
+
+.add-option:hover {
+    background: #059669;
+}
+
+.anonymous-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#dilemmaSubmitBtn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 100%;
+}
+
+#dilemmaSubmitBtn:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+#dilemmaSubmitBtn:disabled {
+    background: #93c5fd;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.dilemmas-list {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.dilemmas-list h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+#listLoading {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.dilemma-item {
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    transition: 0.2s;
+}
+
+.dilemma-item:hover {
+    background: #f8fafc;
+}
+
+.dilemma-content {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    color: #1e293b;
+}
+
+.dilemma-options {
+    margin-bottom: 20px;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.option:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.option.voted {
+    background: #dbeafe;
+    border-color: #3b82f6;
+}
+
+.option.disabled {
+    cursor: not-allowed;
+}
+
+.option.vote-loading {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.option-text {
+    flex: 1;
+}
+
+.vote-count {
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #475569;
+}
+
+.dilemma-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.anonymous-tag {
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #475569;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 60px 20px;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* 道德困惑墙 - 响应式设计 */
+@media (max-width: 768px) {
+    .dilemmas-section {
+        padding: 20px;
+    }
+    
+    .dilemma-form,
+    .dilemmas-list {
+        padding: 20px;
+    }
+    
+    .option-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .remove-option {
+        align-self: flex-start;
+        margin-top: 5px;
+    }
+    
+    .dilemma-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+/* 道德困惑墙 - 深色模式 */
+.app-container.dark-mode .dilemma-form,
+.app-container.dark-mode .dilemmas-list {
+    background: #1e293b;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.app-container.dark-mode .dilemma-form h2,
+.app-container.dark-mode .dilemmas-list h2 {
+    color: #f8fafc;
+}
+
+.app-container.dark-mode .form-group label {
+    color: #cbd5e1;
+}
+
+.app-container.dark-mode .form-group textarea,
+.app-container.dark-mode .option-input {
+    background: #334155;
+    border-color: #475569;
+    color: #f8fafc;
+}
+
+.app-container.dark-mode .form-group textarea:focus,
+.app-container.dark-mode .option-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.app-container.dark-mode .char-count,
+.app-container.dark-mode #listLoading {
+    color: #94a3b8;
+}
+
+.app-container.dark-mode .dilemma-item {
+    border-bottom-color: #334155;
+}
+
+.app-container.dark-mode .dilemma-item:hover {
+    background: #334155;
+}
+
+.app-container.dark-mode .dilemma-content {
+    color: #f8fafc;
+}
+
+.app-container.dark-mode .option {
+    border-color: #475569;
+    color: #f8fafc;
+}
+
+.app-container.dark-mode .option:hover {
+    background: #334155;
+    border-color: #64748b;
+}
+
+.app-container.dark-mode .option.voted {
+    background: #1e3a8a;
+    border-color: #3b82f6;
+}
+
+.app-container.dark-mode .vote-count,
+.app-container.dark-mode .anonymous-tag {
+    background: #334155;
+    color: #94a3b8;
+}
+
+.app-container.dark-mode .dilemma-meta {
+    color: #94a3b8;
+}
+
+.app-container.dark-mode .empty-message {
+    color: #94a3b8;
 }

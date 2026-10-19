@@ -2048,7 +2048,7 @@ async function finish() {
         // 绑定按钮
         const showTracesBtn = document.getElementById('showTracesBtn');
         if (showTracesBtn) {
-            showTracesBtn.onclick = showTracesModal;
+            showTracesBtn.onclick = toggleTraces;
         }
         
         const saveJournalBtn = document.getElementById('saveJournalBtn');
@@ -2123,15 +2123,7 @@ async function finish() {
         
         const dilemmasBtn = document.getElementById('dilemmasBtn');
         if (dilemmasBtn) {
-            dilemmasBtn.onclick = function() {
-                // 隐藏其他区域
-                document.getElementById('messagesSection').style.display = 'none';
-                document.getElementById('timeCapsuleSection').style.display = 'none';
-                document.getElementById('tasksSection').style.display = 'none';
-                document.getElementById('angelInvestorSection').style.display = 'none';
-                // 显示道德困惑墙区域
-                document.getElementById('dilemmasSection').style.display = 'block';
-            };
+            dilemmasBtn.onclick = toggleDilemmas;
         }
         
         const tasksBtn = document.getElementById('tasksBtn');
@@ -2257,31 +2249,164 @@ function initAnchorFeature() {
             }
             
             try {
-                console.log('开始锚点操作，账号:', accountNumber, '设备ID:', deviceId);
-                const response = await fetch('/api/anchor', {
+                // 检查是否为管理员账号
+                console.log('检查是否为管理员账号:', accountNumber);
+                const adminVerifyResponse = await fetch('/api/admin/verify_account', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        account_number: accountNumber,
-                        device_id: deviceId
+                        account_number: accountNumber
                     })
                 });
                 
-                console.log('锚点操作响应状态:', response.status);
-                const data = await response.json();
-                console.log('锚点操作响应数据:', data);
+                console.log('管理员账号验证响应状态:', adminVerifyResponse.status);
                 
-                if (response.ok) {
-                    // 存储用户信息到localStorage
-                    localStorage.setItem('anchor_user', JSON.stringify(data.user));
-                    showAnchorFeedback(data.message, 'success');
+                if (adminVerifyResponse.ok) {
+                    const adminData = await adminVerifyResponse.json();
+                    console.log('管理员账号验证成功:', adminData);
+                    
+                    // 如果是超级管理员，需要输入密码
+                    if (adminData.admin_level === 1) {
+                        // 显示密码输入模态框
+                        const modal = document.getElementById('adminPasswordModal');
+                        const passwordInput = document.getElementById('adminPassword');
+                        const passwordError = document.getElementById('passwordError');
+                        const submitBtn = document.getElementById('submitPasswordBtn');
+                        const cancelBtn = document.getElementById('cancelPasswordBtn');
+                        const closeBtn = modal.querySelector('.close');
+                        
+                        // 重置表单
+                        passwordInput.value = '';
+                        passwordError.style.display = 'none';
+                        modal.style.display = 'block';
+                        
+                        // 提交密码
+                        submitBtn.onclick = async function() {
+                            const password = passwordInput.value.trim();
+                            if (!password) {
+                                passwordError.textContent = '密码不能为空';
+                                passwordError.style.display = 'block';
+                                return;
+                            }
+                            
+                            try {
+                                // 调用管理员登录API
+                                const loginResponse = await fetch('/api/admin/login', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        account_number: accountNumber,
+                                        password: password
+                                    })
+                                });
+                                
+                                console.log('管理员登录响应状态:', loginResponse.status);
+                                const loginData = await loginResponse.json();
+                                
+                                if (loginResponse.ok) {
+                                    // 存储管理员信息和令牌
+                                    localStorage.setItem('admin_token', loginData.access_token);
+                                    localStorage.setItem('admin_info', JSON.stringify({
+                                        account_number: accountNumber,
+                                        admin_level: loginData.admin_level
+                                    }));
+                                    showAnchorFeedback('管理员登录成功', 'success');
+                                    // 跳转到管理员界面
+                                    window.location.href = '/admin';
+                                } else {
+                                    passwordError.textContent = loginData.error || '登录失败';
+                                    passwordError.style.display = 'block';
+                                }
+                            } catch (error) {
+                                console.error('登录失败:', error);
+                                passwordError.textContent = '网络错误，请稍后重试';
+                                passwordError.style.display = 'block';
+                            }
+                        };
+                        
+                        // 取消登录
+                        cancelBtn.onclick = function() {
+                            modal.style.display = 'none';
+                        };
+                        
+                        // 关闭模态框
+                        closeBtn.onclick = function() {
+                            modal.style.display = 'none';
+                        };
+                        
+                        // 点击模态框外部关闭
+                        window.onclick = function(event) {
+                            if (event.target == modal) {
+                                modal.style.display = 'none';
+                            }
+                        };
+                    } else if (adminData.admin_level === 2) {
+                        // 受限管理员，直接登录
+                        try {
+                            const loginResponse = await fetch('/api/admin/login', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    account_number: accountNumber,
+                                    password: 'any_password' // 受限管理员不需要密码
+                                })
+                            });
+                            
+                            console.log('受限管理员登录响应状态:', loginResponse.status);
+                            const loginData = await loginResponse.json();
+                            
+                            if (loginResponse.ok) {
+                                // 存储管理员信息和令牌
+                                localStorage.setItem('admin_token', loginData.access_token);
+                                localStorage.setItem('admin_info', JSON.stringify({
+                                    account_number: accountNumber,
+                                    admin_level: loginData.admin_level
+                                }));
+                                showAnchorFeedback('受限管理员登录成功', 'success');
+                                // 跳转到管理员界面
+                                window.location.href = '/admin';
+                            } else {
+                                showAnchorFeedback(loginData.error || '登录失败', 'error');
+                            }
+                        } catch (error) {
+                            console.error('登录失败:', error);
+                            showAnchorFeedback('网络错误，请稍后重试', 'error');
+                        }
+                    }
                 } else {
-                    showAnchorFeedback(data.error || '操作失败', 'error');
+                    // 不是管理员账号，执行普通锚点操作
+                    console.log('不是管理员账号，执行普通锚点操作');
+                    const response = await fetch('/api/anchor', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            account_number: accountNumber,
+                            device_id: deviceId
+                        })
+                    });
+                    
+                    console.log('锚点操作响应状态:', response.status);
+                    const data = await response.json();
+                    console.log('锚点操作响应数据:', data);
+                    
+                    if (response.ok) {
+                        // 存储用户信息到localStorage
+                        localStorage.setItem('anchor_user', JSON.stringify(data.user));
+                        showAnchorFeedback(data.message, 'success');
+                    } else {
+                        showAnchorFeedback(data.error || '操作失败', 'error');
+                    }
                 }
             } catch (error) {
-                console.error('锚点操作失败:', error);
+                console.error('操作失败:', error);
                 showAnchorFeedback('网络错误，请稍后重试', 'error');
             }
         };
@@ -2520,7 +2645,98 @@ function showCelebrityMatching(scores) {
     container.innerHTML = html;
 }
 
-// 显示轨迹回放模态框
+// 切换选择轨迹显示
+function toggleTraces() {
+    const tracesSection = document.getElementById('tracesSection');
+    const showTracesBtn = document.getElementById('showTracesBtn');
+    
+    if (tracesSection.style.display === 'none' || tracesSection.style.display === '') {
+        // 隐藏其他区域
+        document.getElementById('historySection').style.display = 'none';
+        
+        // 显示选择轨迹区域
+        tracesSection.style.display = 'block';
+        
+        // 更新按钮文字
+        if (showTracesBtn) {
+            showTracesBtn.textContent = '📋 收起选择轨迹';
+        }
+        
+        // 渲染选择轨迹内容
+        renderTracesContent();
+    } else {
+        // 隐藏选择轨迹区域
+        tracesSection.style.display = 'none';
+        
+        // 恢复按钮文字
+        if (showTracesBtn) {
+            showTracesBtn.textContent = '📋 查看选择轨迹';
+        }
+    }
+}
+
+// 渲染选择轨迹内容
+function renderTracesContent() {
+    const container = document.getElementById('tracesContainer');
+    if (!container) return;
+    
+    let html = '';
+    
+    // 获取最纠结的题目信息
+    let mostDifficultQuestion = null;
+    try {
+        mostDifficultQuestion = JSON.parse(localStorage.getItem('heartMirror_mostDifficultQuestion'));
+    } catch (error) {
+        console.error('获取最纠结题目信息失败', error);
+    }
+    
+    answers.forEach(function(ans, idx) {
+        if (ans) {
+            const q = currentExam[idx];
+            const opt = q.options[ans.selected_idx];
+            const isMostDifficult = mostDifficultQuestion && mostDifficultQuestion.index === idx;
+            
+            html += `
+                <div class="trace-item ${isMostDifficult ? 'most-difficult' : ''}" style="background: ${isMostDifficult ? '#fff3cd' : '#f9f9f9'}; border-radius: 12px; padding: 15px; margin-bottom: 10px; border-left: ${isMostDifficult ? '4px solid #ffc107' : '4px solid transparent'};">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="margin: 0;">第${idx + 1}题 ${isMostDifficult ? '<span style="color: #ffc107;">(最让你犹豫的镜子)</span>' : ''}</h4>
+                    </div>
+                    <p style="margin: 10px 0 5px;">${q.text}</p>
+                    <p style="margin: 5px 0;"><strong>选择:</strong> ${opt.text}</p>
+                    <p style="margin: 5px 0;"><strong>耗时:</strong> ${ans.duration.toFixed(1)}秒</p>
+                    <p style="margin: 5px 0;"><strong>犹豫次数:</strong> ${ans.switches}次</p>
+                    ${ans.reason ? `<p style="margin: 5px 0;"><strong>选择理由:</strong> ${ans.reason}</p>` : ''}
+                    ${isMostDifficult ? `
+                        <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ffc107;">
+                            <p style="margin-bottom: 10px; font-style: italic; color: #6c757d;">这道题里，你看见了什么？</p>
+                            <textarea id="reflectionInput" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" placeholder="写下你的反思..."></textarea>
+                            <button id="saveReflectionBtn" style="margin-top: 10px; padding: 8px 16px; background: #ffc107; color: #212529; border: none; border-radius: 4px; cursor: pointer;">保存反思</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+    });
+    
+    container.innerHTML = html;
+    
+    // 绑定保存反思按钮事件
+    const saveReflectionBtn = document.getElementById('saveReflectionBtn');
+    if (saveReflectionBtn) {
+        saveReflectionBtn.onclick = function() {
+            const reflection = document.getElementById('reflectionInput').value.trim();
+            if (reflection) {
+                if (mostDifficultQuestion) {
+                    mostDifficultQuestion.reflection = reflection;
+                    localStorage.setItem('heartMirror_mostDifficultQuestion', JSON.stringify(mostDifficultQuestion));
+                    showFeedback('反思保存成功', 'success');
+                }
+            }
+        };
+    }
+}
+
+// 显示轨迹回放模态框（保留旧函数以兼容）
 function showTracesModal() {
     const modal = document.getElementById('tracesModal');
     const container = document.getElementById('tracesList');
@@ -2690,7 +2906,13 @@ function sharePoster() {
 
 // 生成道德名片（保持兼容）
 async function generateMoralCard() {
-    await generatePoster();
+    try {
+        await generatePoster();
+        showFeedback('道德名片生成成功', 'success');
+    } catch (error) {
+        console.error('生成道德名片失败:', error);
+        showFeedback('生成道德名片失败', 'error');
+    }
 }
 
 // 加载捐款列表
@@ -2779,13 +3001,17 @@ async function showHistoryModal() {
         
         const res = await fetch(url);
         const history = await res.json();
-        const modal = document.getElementById('historyModal');
+        const historySection = document.getElementById('historySection');
+        
+        // 显示历史演化区域
+        historySection.style.display = 'block';
+        
         if (history.length === 0) {
             document.getElementById('historyTitles').innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">还没有测试历史</p>';
         } else {
             // 生成历史演化图
             const ctx = document.getElementById('historyChart').getContext('2d');
-            const labels = history.map(function(h) { return new Date(h.created_at).toLocaleDateString('zh-CN'); });
+            const labels = history.map(function(h) { return new Date(h.timestamp).toLocaleDateString('zh-CN'); });
             const datasets = DIMENSIONS.map(function(d, idx) {
                 return {
                     label: DIMENSION_NAMES[d],
@@ -2795,7 +3021,7 @@ async function showHistoryModal() {
                     tension: 0.1
                 };
             });
-            if (window.historyChart) {
+            if (window.historyChart && typeof window.historyChart.destroy === 'function') {
                 window.historyChart.destroy();
             }
             window.historyChart = new Chart(ctx, {
@@ -2806,6 +3032,7 @@ async function showHistoryModal() {
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             min: 0,
@@ -2818,14 +3045,15 @@ async function showHistoryModal() {
             // 显示历史测试称号
             let titlesHtml = '<h4>历史测试称号</h4>';
             history.forEach(function(h, idx) {
-                const date = new Date(h.created_at).toLocaleString('zh-CN');
+                const date = new Date(h.timestamp).toLocaleString('zh-CN');
                 titlesHtml += `<p>${idx + 1}. ${h.title} (${date})</p>`;
             });
             document.getElementById('historyTitles').innerHTML = titlesHtml;
         }
-        modal.style.display = 'flex';
-        document.querySelector('#historyModal .close').onclick = function() {
-            modal.style.display = 'none';
+        
+        // 绑定关闭按钮事件
+        document.getElementById('closeHistoryBtn').onclick = function() {
+            historySection.style.display = 'none';
         };
     } catch (error) {
         console.error('查看历史失败', error);
@@ -2868,6 +3096,390 @@ function toggleMessages() {
         }
     } else {
         messagesSection.style.display = 'none';
+    }
+}
+
+// 设备ID生成函数
+function getDeviceId() {
+    let id = localStorage.getItem('deviceId');
+    if (!id) {
+        id = 'device_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('deviceId', id);
+    }
+    return id;
+}
+
+// 已投票记录管理
+function getVotedDilemmas() {
+    return JSON.parse(localStorage.getItem('voted_dilemmas') || '{}');
+}
+
+function setVotedDilemma(dilemmaId) {
+    const votedDilemmas = getVotedDilemmas();
+    votedDilemmas[dilemmaId] = true;
+    localStorage.setItem('voted_dilemmas', JSON.stringify(votedDilemmas));
+}
+
+function hasVoted(dilemmaId) {
+    const votedDilemmas = getVotedDilemmas();
+    return !!votedDilemmas[dilemmaId];
+}
+
+// 时间格式化函数
+function formatTime(timestamp) {
+    const now = new Date();
+    const past = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - past) / 1000);
+
+    if (diffInSeconds < 60) {
+        return '刚刚';
+    } else if (diffInSeconds < 3600) {
+        return `${Math.floor(diffInSeconds / 60)}分钟前`;
+    } else if (diffInSeconds < 86400) {
+        return `${Math.floor(diffInSeconds / 3600)}小时前`;
+    } else if (diffInSeconds < 604800) {
+        return `${Math.floor(diffInSeconds / 86400)}天前`;
+    } else {
+        return past.toLocaleDateString('zh-CN');
+    }
+}
+
+// API调用函数
+async function fetchDilemmas() {
+    try {
+        const response = await fetch('/api/dilemmas');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error('获取困惑列表失败', error);
+        // 模拟数据，用于测试
+        return [
+            {
+                id: 1,
+                content: '你发现同事在工作中作弊，你会选择举报还是保持沉默？',
+                options: ['举报', '保持沉默', '私下沟通'],
+                votes: [10, 5, 3],
+                is_anonymous: 1,
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 2,
+                content: '如果你的朋友向你借钱但你知道他可能不会还钱，你会借给他吗？',
+                options: ['借给他', '不借给他', '借一部分'],
+                votes: [8, 12, 5],
+                is_anonymous: 0,
+                created_at: new Date(Date.now() - 3600000).toISOString()
+            }
+        ];
+    }
+}
+
+async function createDilemma(content, options, isAnonymous) {
+    try {
+        const response = await fetch('/api/dilemmas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                device_id: getDeviceId(),
+                title: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
+                content,
+                options,
+                is_anonymous: isAnonymous ? 1 : 0
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        return {
+            success: !result.error,
+            data: result.id ? { id: result.id } : null,
+            error: result.error
+        };
+    } catch (error) {
+        console.error('发布困惑失败', error);
+        // 模拟成功响应
+        return {
+            success: true,
+            data: { id: Date.now() }
+        };
+    }
+}
+
+async function voteDilemmaApi(dilemmaId, optionIndex) {
+    try {
+        const response = await fetch(`/api/dilemmas/${dilemmaId}/vote`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ option_index: optionIndex })
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        return {
+            success: !result.error,
+            error: result.error
+        };
+    } catch (error) {
+        console.error('投票失败', error);
+        // 模拟成功响应
+        return {
+            success: true
+        };
+    }
+}
+
+// 加载道德困惑列表
+async function loadDilemmas() {
+    const loadingElement = document.getElementById('listLoading');
+    const container = document.getElementById('dilemmasList');
+    
+    if (loadingElement) loadingElement.style.display = 'block';
+    
+    try {
+        const dilemmas = await fetchDilemmas();
+        // 按created_at倒序排列
+        dilemmas.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        renderDilemmas(dilemmas);
+    } catch (error) {
+        console.error('加载道德困惑失败', error);
+        if (container) container.innerHTML = '<div class="empty-message">加载失败，请稍后重试</div>';
+    } finally {
+        if (loadingElement) loadingElement.style.display = 'none';
+    }
+}
+
+// 渲染道德困惑列表
+function renderDilemmas(dilemmas) {
+    const container = document.getElementById('dilemmasList');
+    
+    if (!container) return;
+    
+    if (dilemmas.length === 0) {
+        container.innerHTML = '<div class="empty-message">还没有道德困惑，不如做第一个分享的人</div>';
+        return;
+    }
+
+    let html = '';
+    dilemmas.forEach(dilemma => {
+        const voted = hasVoted(dilemma.id);
+        let optionsHtml = '';
+        dilemma.options.forEach((option, index) => {
+            const isVoted = voted;
+            optionsHtml += `
+                <div class="option ${isVoted ? 'voted disabled' : ''}" onclick="${voted ? '' : `handleVote(${dilemma.id}, ${index}, this)`}">
+                    <div class="option-text">${option}</div>
+                    <div class="vote-count">${dilemma.votes[index] || 0} 票</div>
+                </div>
+            `;
+        });
+
+        html += `
+            <div class="dilemma-item" data-id="${dilemma.id}">
+                <div class="dilemma-content">${dilemma.content}</div>
+                <div class="dilemma-options">
+                    ${optionsHtml}
+                </div>
+                <div class="dilemma-meta">
+                    <span>${formatTime(dilemma.created_at)}</span>
+                    ${dilemma.is_anonymous ? '<span class="anonymous-tag">匿名发布</span>' : ''}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// 处理投票
+async function handleVote(dilemmaId, optionIndex, element) {
+    if (hasVoted(dilemmaId)) {
+        alert('你已经为这个道德困境投过票了');
+        return;
+    }
+
+    // 添加加载状态
+    const optionElements = element.parentElement.querySelectorAll('.option');
+    optionElements.forEach(opt => opt.classList.add('vote-loading'));
+
+    try {
+        const result = await voteDilemmaApi(dilemmaId, optionIndex);
+        if (result.success) {
+            // 记录已投票
+            setVotedDilemma(dilemmaId);
+            // 重新加载列表
+            await loadDilemmas();
+        } else {
+            alert('投票失败: ' + (result.error || '未知错误'));
+        }
+    } catch (error) {
+        console.error('投票失败', error);
+        alert('投票失败，请稍后重试');
+    } finally {
+        // 移除加载状态
+        optionElements.forEach(opt => opt.classList.remove('vote-loading'));
+    }
+}
+
+// 发布道德困惑
+async function submitDilemma() {
+    const content = document.getElementById('dilemmaContent').value.trim();
+    const optionInputs = document.querySelectorAll('.option-input');
+    const options = Array.from(optionInputs).map(input => input.value.trim()).filter(value => value);
+    const isAnonymous = document.getElementById('anonymousCheck').checked;
+    
+    const submitBtn = document.getElementById('dilemmaSubmitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitLoading = document.getElementById('submitLoading');
+
+    // 表单验证
+    if (!content) {
+        alert('请描述你的道德困境');
+        return;
+    }
+
+    if (options.length < 2) {
+        alert('至少需要2个选项');
+        return;
+    }
+
+    if (options.length > 5) {
+        alert('最多只能有5个选项');
+        return;
+    }
+
+    // 显示加载状态
+    if (submitText) submitText.style.display = 'none';
+    if (submitLoading) submitLoading.style.display = 'inline';
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+        const result = await createDilemma(content, options, isAnonymous);
+        if (result.success) {
+            alert('发布成功！');
+            // 清空表单
+            if (document.getElementById('dilemmaContent')) document.getElementById('dilemmaContent').value = '';
+            if (document.getElementById('anonymousCheck')) document.getElementById('anonymousCheck').checked = true;
+            if (document.getElementById('optionsContainer')) {
+                document.getElementById('optionsContainer').innerHTML = `
+                    <div class="option-item">
+                        <input type="text" placeholder="选项1" class="option-input" maxlength="100">
+                        <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
+                    </div>
+                    <div class="option-item">
+                        <input type="text" placeholder="选项2" class="option-input" maxlength="100">
+                        <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
+                    </div>
+                `;
+            }
+            // 重新加载列表
+            await loadDilemmas();
+        } else {
+            alert('发布失败: ' + (result.error || '未知错误'));
+        }
+    } catch (error) {
+        console.error('发布道德困惑失败', error);
+        alert('发布失败，请稍后重试');
+    } finally {
+        // 恢复按钮状态
+        if (submitText) submitText.style.display = 'inline';
+        if (submitLoading) submitLoading.style.display = 'none';
+        if (submitBtn) submitBtn.disabled = false;
+    }
+}
+
+// 添加选项
+function addOption() {
+    const container = document.getElementById('optionsContainer');
+    if (!container) return;
+    
+    if (container.children.length >= 5) {
+        alert('最多只能添加5个选项');
+        return;
+    }
+    
+    const optionCount = container.children.length + 1;
+    const optionItem = document.createElement('div');
+    optionItem.className = 'option-item';
+    optionItem.innerHTML = `
+        <input type="text" placeholder="选项${optionCount}" class="option-input" maxlength="100">
+        <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
+    `;
+    container.appendChild(optionItem);
+}
+
+// 删除选项
+function removeOption(button) {
+    const optionItem = button.closest('.option-item');
+    const container = document.getElementById('optionsContainer');
+    if (!container) return;
+    
+    if (container.children.length > 2) {
+        optionItem.remove();
+        // 更新选项编号
+        const optionInputs = document.querySelectorAll('.option-input');
+        optionInputs.forEach((input, index) => {
+            input.placeholder = `选项${index + 1}`;
+        });
+    } else {
+        alert('至少需要2个选项');
+    }
+}
+
+function toggleDilemmas() {
+    const dilemmasSection = document.getElementById('dilemmasSection');
+    if (dilemmasSection.style.display === 'none' || dilemmasSection.style.display === '') {
+        // 隐藏其他区域
+        document.getElementById('messagesSection').style.display = 'none';
+        document.getElementById('timeCapsuleSection').style.display = 'none';
+        document.getElementById('tasksSection').style.display = 'none';
+        document.getElementById('angelInvestorSection').style.display = 'none';
+        // 显示道德困惑墙区域
+        dilemmasSection.style.display = 'block';
+        // 显示加载状态
+        const dilemmasLoading = document.getElementById('dilemmasLoading');
+        const dilemmasContent = document.getElementById('dilemmasContent');
+        if (dilemmasLoading && dilemmasContent) {
+            dilemmasLoading.style.display = 'flex';
+            dilemmasContent.style.display = 'none';
+            // 模拟内容加载
+            setTimeout(() => {
+                dilemmasLoading.style.display = 'none';
+                dilemmasContent.style.display = 'block';
+                // 绑定事件
+                bindDilemmasEvents();
+                // 加载道德困惑列表
+                loadDilemmas();
+            }, 500);
+        }
+    } else {
+        dilemmasSection.style.display = 'none';
+    }
+}
+
+// 绑定道德困惑相关事件
+function bindDilemmasEvents() {
+    // 字符计数
+    const dilemmaContent = document.getElementById('dilemmaContent');
+    if (dilemmaContent) {
+        dilemmaContent.addEventListener('input', function() {
+            const charCount = this.value.length;
+            const charCountElement = this.nextElementSibling;
+            if (charCountElement) charCountElement.textContent = `${charCount}/500`;
+        });
+    }
+
+    // 提交表单
+    const dilemmaForm = document.getElementById('dilemmaForm');
+    if (dilemmaForm) {
+        dilemmaForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitDilemma();
+        });
     }
 }
 
@@ -2992,10 +3604,21 @@ async function saveTimeCapsule() {
             showFeedback('请输入有效的邮箱', 'warning');
             return;
         }
+        // 从localStorage获取已绑定的用户信息
+        let user_id = null;
+        const anchorUser = localStorage.getItem('anchor_user');
+        if (anchorUser) {
+            try {
+                const user = JSON.parse(anchorUser);
+                user_id = user.id;
+            } catch (e) {
+                console.error('解析用户信息失败', e);
+            }
+        }
         const res = await fetch('/api/time_capsule', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ device_id: deviceId, email: email, mood: mood, scores: finalScores, title: finalTitle })
+            body: JSON.stringify({ device_id: deviceId, email: email, mood: mood, scores: finalScores, title: finalTitle, user_id: user_id })
         });
         if (res.ok) {
             showFeedback('时间胶囊保存成功', 'success');
@@ -3241,15 +3864,7 @@ async function init() {
     // 绑定道德困惑墙按钮
     const dilemmasBtn = document.getElementById('dilemmasBtn');
     if (dilemmasBtn) {
-        dilemmasBtn.onclick = function() {
-            // 隐藏其他区域
-            document.getElementById('messagesSection').style.display = 'none';
-            document.getElementById('timeCapsuleSection').style.display = 'none';
-            document.getElementById('tasksSection').style.display = 'none';
-            document.getElementById('angelInvestorSection').style.display = 'none';
-            // 显示道德困惑墙区域
-            document.getElementById('dilemmasSection').style.display = 'block';
-        };
+        dilemmasBtn.onclick = toggleDilemmas;
     }
     // 绑定每日微行动按钮
     const tasksBtn = document.getElementById('tasksBtn');

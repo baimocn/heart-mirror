@@ -1,0 +1,17 @@
+# Tasks
+- [x] Task 1: 在index.html中添加选择轨迹展示区域HTML结构
+  - [x] SubTask 1.1: 添加tracesSection容器，包含标题、内容区域和关闭按钮
+  - [x] SubTask 1.2: 确保结构与historySection保持一致
+- [x] Task 2: 修改script.js中的显示逻辑
+  - [x] SubTask 2.1: 将showTracesModal函数改为toggleTraces函数
+  - [x] SubTask 2.2: 实现展开/收起切换功能
+  - [x] SubTask 2.3: 更新按钮文字状态
+- [x] Task 3: 移除tracesModal模态框
+  - [x] SubTask 3.1: 从index.html中删除tracesModal相关HTML
+- [x] Task 4: 添加CSS样式
+  - [x] SubTask 4.1: 为tracesSection添加样式（参考history-section）
+  - [x] SubTask 4.2: 确保样式与整体设计一致
+- [x] Task 5: 测试验证
+  - [x] SubTask 5.1: 验证展开/收起功能正常
+  - [x] SubTask 5.2: 验证选择轨迹内容正确显示
+  - [x] SubTask 5.3: 验证按钮文字状态切换正确

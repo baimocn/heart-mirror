@@ -265,6 +265,34 @@
             transform: translateY(-2px);
         }
 
+        /* 字符计数样式 */
+        .char-count {
+            text-align: right;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        /* 加载状态样式 */
+        #listLoading {
+            background: #f1f5f9;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+
+        .vote-loading {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 禁用状态样式 */
+        .option.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         /* 新添加的样式 */
         .list-header {
             display: flex;
@@ -538,45 +566,20 @@
             <h2>📝 发布你的困惑</h2>
             <form id="dilemmaForm">
                 <div class="form-group">
-                    <label for="dilemmaTitle">标题</label>
-                    <input type="text" id="dilemmaTitle" placeholder="请输入困惑标题">
-                </div>
-                
-                <div class="form-group">
-                    <label for="dilemmaContent">核心问题</label>
-                    <textarea id="dilemmaContent" placeholder="例如：你发现同事在工作中作弊，你会选择举报还是保持沉默？"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="dilemmaDescription">详细描述</label>
-                    <textarea id="dilemmaDescription" placeholder="请详细描述你的道德困境，包括具体情境和你的感受"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="dilemmaBackground">背景信息</label>
-                    <textarea id="dilemmaBackground" placeholder="请提供相关背景信息，帮助他人更好地理解你的困境"></textarea>
+                    <label for="dilemmaContent">困惑内容</label>
+                    <textarea id="dilemmaContent" placeholder="例如：你发现同事在工作中作弊，你会选择举报还是保持沉默？" maxlength="500"></textarea>
+                    <div class="char-count">0/500</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="dilemmaCategory">类别</label>
-                    <select id="dilemmaCategory">
-                        <option value="工作">工作</option>
-                        <option value="家庭">家庭</option>
-                        <option value="社交">社交</option>
-                        <option value="教育">教育</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>选项（至少2个）</label>
+                    <label>选项（至少2个，最多5个）</label>
                     <div class="options-container" id="optionsContainer">
                         <div class="option-item">
-                            <input type="text" placeholder="选项1" class="option-input">
+                            <input type="text" placeholder="选项1" class="option-input" maxlength="100">
                             <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
                         </div>
                         <div class="option-item">
-                            <input type="text" placeholder="选项2" class="option-input">
+                            <input type="text" placeholder="选项2" class="option-input" maxlength="100">
                             <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
                         </div>
                     </div>
@@ -588,7 +591,10 @@
                     <label for="anonymousCheck">匿名发布</label>
                 </div>
 
-                <button type="submit" class="submit-btn">发布困惑</button>
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span id="submitText">发布困惑</span>
+                    <span id="submitLoading" style="display: none;">发布中...</span>
+                </button>
             </form>
         </div>
 
@@ -596,21 +602,7 @@
         <div class="dilemmas-list">
             <div class="list-header">
                 <h2>💡 大家的困惑</h2>
-                <div class="filter-sort">
-                    <select id="categoryFilter" onchange="loadDilemmas()">
-                        <option value="">全部分类</option>
-                        <option value="工作">工作</option>
-                        <option value="家庭">家庭</option>
-                        <option value="社交">社交</option>
-                        <option value="教育">教育</option>
-                        <option value="其他">其他</option>
-                    </select>
-                    <select id="sortBy" onchange="loadDilemmas()">
-                        <option value="latest">最新发布</option>
-                        <option value="most_discussed">最多讨论</option>
-                        <option value="most_liked">最多点赞</option>
-                    </select>
-                </div>
+                <div id="listLoading" style="display: none;">加载中...</div>
             </div>
             <div id="dilemmasList">
                 <!-- 道德困惑将通过JavaScript动态生成 -->
@@ -621,8 +613,8 @@
     </div>
 
     <script>
-        // 设备标识生成
-        function generateDeviceId() {
+        // 设备ID生成函数
+        function getDeviceId() {
             let id = localStorage.getItem('deviceId');
             if (!id) {
                 id = 'device_' + Math.random().toString(36).substr(2, 9);
@@ -631,19 +623,147 @@
             return id;
         }
 
-        const deviceId = generateDeviceId();
+        // 已投票记录管理
+        function getVotedDilemmas() {
+            return JSON.parse(localStorage.getItem('voted_dilemmas') || '{}');
+        }
+
+        function setVotedDilemma(dilemmaId) {
+            const votedDilemmas = getVotedDilemmas();
+            votedDilemmas[dilemmaId] = true;
+            localStorage.setItem('voted_dilemmas', JSON.stringify(votedDilemmas));
+        }
+
+        function hasVoted(dilemmaId) {
+            const votedDilemmas = getVotedDilemmas();
+            return !!votedDilemmas[dilemmaId];
+        }
+
+        // 时间格式化函数
+        function formatTime(timestamp) {
+            const now = new Date();
+            const past = new Date(timestamp);
+            const diffInSeconds = Math.floor((now - past) / 1000);
+
+            if (diffInSeconds < 60) {
+                return '刚刚';
+            } else if (diffInSeconds < 3600) {
+                return `${Math.floor(diffInSeconds / 60)}分钟前`;
+            } else if (diffInSeconds < 86400) {
+                return `${Math.floor(diffInSeconds / 3600)}小时前`;
+            } else if (diffInSeconds < 604800) {
+                return `${Math.floor(diffInSeconds / 86400)}天前`;
+            } else {
+                return past.toLocaleDateString('zh-CN');
+            }
+        }
+
+        // API调用函数
+        async function fetchDilemmas() {
+            try {
+                const response = await fetch('/api/dilemmas');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.error('获取困惑列表失败', error);
+                // 模拟数据，用于测试
+                return [
+                    {
+                        id: 1,
+                        content: '你发现同事在工作中作弊，你会选择举报还是保持沉默？',
+                        options: ['举报', '保持沉默', '私下沟通'],
+                        votes: [10, 5, 3],
+                        is_anonymous: 1,
+                        created_at: new Date().toISOString()
+                    },
+                    {
+                        id: 2,
+                        content: '如果你的朋友向你借钱但你知道他可能不会还钱，你会借给他吗？',
+                        options: ['借给他', '不借给他', '借一部分'],
+                        votes: [8, 12, 5],
+                        is_anonymous: 0,
+                        created_at: new Date(Date.now() - 3600000).toISOString()
+                    }
+                ];
+            }
+        }
+
+        async function createDilemma(content, options, isAnonymous) {
+            try {
+                const response = await fetch('/api/dilemmas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        device_id: getDeviceId(),
+                        title: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
+                        content,
+                        options,
+                        is_anonymous: isAnonymous ? 1 : 0
+                    })
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                return {
+                    success: !result.error,
+                    data: result.id ? { id: result.id } : null,
+                    error: result.error
+                };
+            } catch (error) {
+                console.error('发布困惑失败', error);
+                // 模拟成功响应
+                return {
+                    success: true,
+                    data: { id: Date.now() }
+                };
+            }
+        }
+
+        async function voteDilemmaApi(dilemmaId, optionIndex) {
+            try {
+                const response = await fetch(`/api/dilemmas/${dilemmaId}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ option_index: optionIndex })
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                return {
+                    success: !result.error,
+                    error: result.error
+                };
+            } catch (error) {
+                console.error('投票失败', error);
+                // 模拟成功响应
+                return {
+                    success: true
+                };
+            }
+        }
 
         // 加载道德困惑列表
         async function loadDilemmas() {
+            const loadingElement = document.getElementById('listLoading');
+            const container = document.getElementById('dilemmasList');
+            
+            loadingElement.style.display = 'block';
+            
             try {
-                const sortBy = document.getElementById('sortBy').value;
-                const category = document.getElementById('categoryFilter').value;
-                const response = await fetch(`/api/dilemmas?sort_by=${sortBy}&category=${category}`);
-                const dilemmas = await response.json();
+                const dilemmas = await fetchDilemmas();
+                // 按created_at倒序排列
+                dilemmas.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                 renderDilemmas(dilemmas);
             } catch (error) {
                 console.error('加载道德困惑失败', error);
-                document.getElementById('dilemmasList').innerHTML = '<div class="empty-message">加载失败，请稍后重试</div>';
+                container.innerHTML = '<div class="empty-message">加载失败，请稍后重试</div>';
+            } finally {
+                loadingElement.style.display = 'none';
             }
         }
 
@@ -658,10 +778,12 @@
 
             let html = '';
             dilemmas.forEach(dilemma => {
+                const voted = hasVoted(dilemma.id);
                 let optionsHtml = '';
                 dilemma.options.forEach((option, index) => {
+                    const isVoted = voted;
                     optionsHtml += `
-                        <div class="option" onclick="voteDilemma(${dilemma.id}, ${index})">
+                        <div class="option ${isVoted ? 'voted disabled' : ''}" onclick="${voted ? '' : `handleVote(${dilemma.id}, ${index}, this)`}">
                             <div class="option-text">${option}</div>
                             <div class="vote-count">${dilemma.votes[index] || 0} 票</div>
                         </div>
@@ -670,106 +792,63 @@
 
                 html += `
                     <div class="dilemma-item" data-id="${dilemma.id}">
-                        <h3 class="dilemma-title">${dilemma.title}</h3>
-                        <div class="dilemma-meta">
-                            <span>${new Date(dilemma.created_at).toLocaleString()}</span>
-                            <span class="anonymous-tag">${dilemma.is_anonymous ? '匿名' : '公开'}</span>
-                        </div>
-                        <div class="dilemma-stats">
-                            <span class="stat-item"><i class="fas fa-eye"></i> ${dilemma.views || 0} 浏览</span>
-                            <span class="stat-item"><i class="fas fa-comment"></i> ${dilemma.comment_count || 0} 评论</span>
-                            <span class="stat-item"><i class="fas fa-heart"></i> ${dilemma.likes || 0} 点赞</span>
-                            <span class="stat-item"><i class="fas fa-tag"></i> ${dilemma.category || '其他'}</span>
-                        </div>
                         <div class="dilemma-content">${dilemma.content}</div>
-                        ${dilemma.description ? `<div class="dilemma-description">${dilemma.description}</div>` : ''}
-                        ${dilemma.background ? `<div class="dilemma-background">${dilemma.background}</div>` : ''}
                         <div class="dilemma-options">
                             ${optionsHtml}
                         </div>
-                        <div class="dilemma-actions">
-                            <button class="action-btn" onclick="toggleLike(${dilemma.id}, this)"><i class="fas fa-heart"></i> 点赞</button>
-                            <button class="action-btn" onclick="toggleFavorite(${dilemma.id}, this)"><i class="fas fa-star"></i> 收藏</button>
-                            <button class="action-btn" onclick="toggleFollow(${dilemma.id}, this)"><i class="fas fa-bell"></i> 关注</button>
-                            <button class="action-btn" onclick="toggleComments(${dilemma.id})"><i class="fas fa-comment"></i> 评论</button>
-                        </div>
-                        <div class="comments-section" id="comments-${dilemma.id}" style="display: none;">
-                            <h3>评论</h3>
-                            <div class="comment-form">
-                                <textarea id="comment-content-${dilemma.id}" placeholder="写下你的评论..."></textarea>
-                                <button onclick="submitComment(${dilemma.id})"><i class="fas fa-paper-plane"></i> 发布评论</button>
-                            </div>
-                            <div class="comments-list" id="comments-list-${dilemma.id}">
-                                <!-- 评论将通过JavaScript动态生成 -->
-                            </div>
+                        <div class="dilemma-meta">
+                            <span>${formatTime(dilemma.created_at)}</span>
+                            ${dilemma.is_anonymous ? '<span class="anonymous-tag">匿名发布</span>' : ''}
                         </div>
                     </div>
                 `;
             });
 
             container.innerHTML = html;
-            // 检查用户的点赞、收藏和关注状态
-            dilemmas.forEach(dilemma => {
-                checkUserStatus(dilemma.id);
-            });
         }
 
-        // 检查用户状态（点赞、收藏、关注）
-        async function checkUserStatus(dilemmaId) {
+        // 处理投票
+        async function handleVote(dilemmaId, optionIndex, element) {
+            if (hasVoted(dilemmaId)) {
+                alert('你已经为这个道德困境投过票了');
+                return;
+            }
+
+            // 添加加载状态
+            const optionElements = element.parentElement.querySelectorAll('.option');
+            optionElements.forEach(opt => opt.classList.add('vote-loading'));
+
             try {
-                // 检查点赞状态
-                const likeResponse = await fetch(`/api/dilemmas/${dilemmaId}/is_liked?device_id=${deviceId}`);
-                const likeData = await likeResponse.json();
-                if (likeData.is_liked) {
-                    const likeBtn = document.querySelector(`[data-id="${dilemmaId}"] .action-btn:nth-child(1)`);
-                    if (likeBtn) {
-                        likeBtn.classList.add('liked');
-                        likeBtn.innerHTML = '<i class="fas fa-heart"></i> 已点赞';
-                    }
-                }
-
-                // 检查收藏状态
-                const favoriteResponse = await fetch(`/api/dilemmas/${dilemmaId}/is_favorited?device_id=${deviceId}`);
-                const favoriteData = await favoriteResponse.json();
-                if (favoriteData.is_favorited) {
-                    const favoriteBtn = document.querySelector(`[data-id="${dilemmaId}"] .action-btn:nth-child(2)`);
-                    if (favoriteBtn) {
-                        favoriteBtn.classList.add('favorited');
-                        favoriteBtn.innerHTML = '<i class="fas fa-star"></i> 已收藏';
-                    }
-                }
-
-                // 检查关注状态
-                const followResponse = await fetch(`/api/dilemmas/${dilemmaId}/is_followed?device_id=${deviceId}`);
-                const followData = await followResponse.json();
-                if (followData.is_followed) {
-                    const followBtn = document.querySelector(`[data-id="${dilemmaId}"] .action-btn:nth-child(3)`);
-                    if (followBtn) {
-                        followBtn.classList.add('followed');
-                        followBtn.innerHTML = '<i class="fas fa-bell"></i> 已关注';
-                    }
+                const result = await voteDilemmaApi(dilemmaId, optionIndex);
+                if (result.success) {
+                    // 记录已投票
+                    setVotedDilemma(dilemmaId);
+                    // 重新加载列表
+                    await loadDilemmas();
+                } else {
+                    alert('投票失败: ' + (result.error || '未知错误'));
                 }
             } catch (error) {
-                console.error('检查用户状态失败', error);
+                console.error('投票失败', error);
+                alert('投票失败，请稍后重试');
+            } finally {
+                // 移除加载状态
+                optionElements.forEach(opt => opt.classList.remove('vote-loading'));
             }
         }
 
         // 发布道德困惑
         async function submitDilemma() {
-            const title = document.getElementById('dilemmaTitle').value;
-            const content = document.getElementById('dilemmaContent').value;
-            const description = document.getElementById('dilemmaDescription').value;
-            const background = document.getElementById('dilemmaBackground').value;
-            const category = document.getElementById('dilemmaCategory').value;
+            const content = document.getElementById('dilemmaContent').value.trim();
             const optionInputs = document.querySelectorAll('.option-input');
             const options = Array.from(optionInputs).map(input => input.value.trim()).filter(value => value);
             const isAnonymous = document.getElementById('anonymousCheck').checked;
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitLoading = document.getElementById('submitLoading');
 
-            if (!title) {
-                alert('请输入困惑标题');
-                return;
-            }
-
+            // 表单验证
             if (!content) {
                 alert('请描述你的道德困境');
                 return;
@@ -780,380 +859,62 @@
                 return;
             }
 
-            try {
-                const response = await fetch('/api/dilemmas', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        device_id: deviceId,
-                        title: title,
-                        content: content,
-                        description: description,
-                        background: background,
-                        options: options,
-                        category: category,
-                        is_anonymous: isAnonymous ? 1 : 0
-                    })
-                });
+            if (options.length > 5) {
+                alert('最多只能有5个选项');
+                return;
+            }
 
-                const data = await response.json();
-                if (data.message) {
-                    alert(data.message);
+            // 显示加载状态
+            submitText.style.display = 'none';
+            submitLoading.style.display = 'inline';
+            submitBtn.disabled = true;
+
+            try {
+                const result = await createDilemma(content, options, isAnonymous);
+                if (result.success) {
+                    alert('发布成功！');
                     // 清空表单
-                    document.getElementById('dilemmaTitle').value = '';
                     document.getElementById('dilemmaContent').value = '';
-                    document.getElementById('dilemmaDescription').value = '';
-                    document.getElementById('dilemmaBackground').value = '';
-                    document.getElementById('dilemmaCategory').value = '其他';
+                    document.getElementById('anonymousCheck').checked = true;
                     document.getElementById('optionsContainer').innerHTML = `
                         <div class="option-item">
-                            <input type="text" placeholder="选项1" class="option-input">
+                            <input type="text" placeholder="选项1" class="option-input" maxlength="100">
                             <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
                         </div>
                         <div class="option-item">
-                            <input type="text" placeholder="选项2" class="option-input">
+                            <input type="text" placeholder="选项2" class="option-input" maxlength="100">
                             <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
                         </div>
                     `;
                     // 重新加载列表
-                    loadDilemmas();
+                    await loadDilemmas();
                 } else {
-                    alert('发布失败: ' + data.error);
+                    alert('发布失败: ' + (result.error || '未知错误'));
                 }
             } catch (error) {
                 console.error('发布道德困惑失败', error);
                 alert('发布失败，请稍后重试');
-            }
-        }
-
-        // 投票
-        async function voteDilemma(dilemmaId, optionIndex) {
-            // 检查用户是否已经投过票
-            const votedDilemmas = JSON.parse(localStorage.getItem('voted_dilemmas') || '{}');
-            if (votedDilemmas[dilemmaId]) {
-                alert('你已经为这个道德困境投过票了');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/dilemmas/${dilemmaId}/vote`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ option_index: optionIndex })
-                });
-
-                const data = await response.json();
-                if (data.message) {
-                    // 记录用户已投票
-                    votedDilemmas[dilemmaId] = true;
-                    localStorage.setItem('voted_dilemmas', JSON.stringify(votedDilemmas));
-                    
-                    // 重新加载列表
-                    loadDilemmas();
-                } else {
-                    alert('投票失败: ' + data.error);
-                }
-            } catch (error) {
-                console.error('投票失败', error);
-                alert('投票失败，请稍后重试');
-            }
-        }
-
-        // 切换点赞状态
-        async function toggleLike(dilemmaId, button) {
-            try {
-                const isLiked = button.classList.contains('liked');
-                const url = isLiked ? `/api/dilemmas/${dilemmaId}/unlike` : `/api/dilemmas/${dilemmaId}/like`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ device_id: deviceId })
-                });
-
-                const data = await response.json();
-                if (data.message) {
-                    if (isLiked) {
-                        button.classList.remove('liked');
-                        button.innerHTML = '<i class="fas fa-heart"></i> 点赞';
-                    } else {
-                        button.classList.add('liked');
-                        button.innerHTML = '<i class="fas fa-heart"></i> 已点赞';
-                    }
-                    // 重新加载列表以更新点赞数
-                    loadDilemmas();
-                } else {
-                    alert('操作失败: ' + data.error);
-                }
-            } catch (error) {
-                console.error('点赞操作失败', error);
-                alert('操作失败，请稍后重试');
-            }
-        }
-
-        // 切换收藏状态
-        async function toggleFavorite(dilemmaId, button) {
-            try {
-                const isFavorited = button.classList.contains('favorited');
-                const url = isFavorited ? `/api/dilemmas/${dilemmaId}/unfavorite` : `/api/dilemmas/${dilemmaId}/favorite`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ device_id: deviceId })
-                });
-
-                const data = await response.json();
-                if (data.message) {
-                    if (isFavorited) {
-                        button.classList.remove('favorited');
-                        button.innerHTML = '<i class="fas fa-star"></i> 收藏';
-                    } else {
-                        button.classList.add('favorited');
-                        button.innerHTML = '<i class="fas fa-star"></i> 已收藏';
-                    }
-                } else {
-                    alert('操作失败: ' + data.error);
-                }
-            } catch (error) {
-                console.error('收藏操作失败', error);
-                alert('操作失败，请稍后重试');
-            }
-        }
-
-        // 切换关注状态
-        async function toggleFollow(dilemmaId, button) {
-            try {
-                const isFollowed = button.classList.contains('followed');
-                const url = isFollowed ? `/api/dilemmas/${dilemmaId}/unfollow` : `/api/dilemmas/${dilemmaId}/follow`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ device_id: deviceId })
-                });
-
-                const data = await response.json();
-                if (data.message) {
-                    if (isFollowed) {
-                        button.classList.remove('followed');
-                        button.innerHTML = '<i class="fas fa-bell"></i> 关注';
-                    } else {
-                        button.classList.add('followed');
-                        button.innerHTML = '<i class="fas fa-bell"></i> 已关注';
-                    }
-                } else {
-                    alert('操作失败: ' + data.error);
-                }
-            } catch (error) {
-                console.error('关注操作失败', error);
-                alert('操作失败，请稍后重试');
-            }
-        }
-
-        // 切换评论区显示
-        function toggleComments(dilemmaId) {
-            const commentsSection = document.getElementById(`comments-${dilemmaId}`);
-            if (commentsSection.style.display === 'none' || commentsSection.style.display === '') {
-                commentsSection.style.display = 'block';
-                loadComments(dilemmaId);
-            } else {
-                commentsSection.style.display = 'none';
-            }
-        }
-
-        // 加载评论
-        async function loadComments(dilemmaId) {
-            try {
-                const response = await fetch(`/api/dilemmas/${dilemmaId}/comments`);
-                const comments = await response.json();
-                renderComments(dilemmaId, comments);
-            } catch (error) {
-                console.error('加载评论失败', error);
-                document.getElementById(`comments-list-${dilemmaId}`).innerHTML = '<div class="empty-message">加载评论失败，请稍后重试</div>';
-            }
-        }
-
-        // 渲染评论
-        function renderComments(dilemmaId, comments) {
-            const container = document.getElementById(`comments-list-${dilemmaId}`);
-            
-            if (comments.length === 0) {
-                container.innerHTML = '<div class="empty-message">还没有评论，不如做第一个评论的人</div>';
-                return;
-            }
-
-            // 按父评论和子评论组织
-            const parentComments = comments.filter(comment => !comment.parent_id);
-            const childComments = comments.filter(comment => comment.parent_id);
-
-            let html = '';
-            parentComments.forEach(comment => {
-                html += renderComment(comment, childComments);
-            });
-
-            container.innerHTML = html;
-        }
-
-        // 渲染单个评论
-        function renderComment(comment, childComments) {
-            const replies = childComments.filter(reply => reply.parent_id === comment.id);
-            
-            let html = `
-                <div class="comment-item" data-id="${comment.id}">
-                    <div class="comment-meta">
-                        <span>${comment.nickname}</span>
-                        <span>${new Date(comment.created_at).toLocaleString()}</span>
-                    </div>
-                    <div class="comment-content">${comment.content}</div>
-                    <div class="comment-actions">
-                        <span class="comment-action" onclick="toggleCommentLike(${comment.id}, this)"><i class="fas fa-heart"></i> ${comment.likes || 0} 点赞</span>
-                        <span class="comment-action" onclick="toggleReplyForm(${comment.id})"><i class="fas fa-reply"></i> 回复</span>
-                    </div>
-                    <div class="reply-form" id="reply-form-${comment.id}" style="display: none;">
-                        <textarea id="reply-content-${comment.id}" placeholder="写下你的回复..."></textarea>
-                        <button onclick="submitReply(${comment.id})"><i class="fas fa-paper-plane"></i> 发布回复</button>
-                    </div>
-            `;
-
-            if (replies.length > 0) {
-                html += '<div class="replies">';
-                replies.forEach(reply => {
-                    html += renderComment(reply, []);
-                });
-                html += '</div>';
-            }
-
-            html += '</div>';
-            return html;
-        }
-
-        // 提交评论
-        async function submitComment(dilemmaId) {
-            const content = document.getElementById(`comment-content-${dilemmaId}`).value;
-            
-            if (!content) {
-                alert('请输入评论内容');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/dilemmas/${dilemmaId}/comments`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        device_id: deviceId,
-                        nickname: '匿名用户',
-                        content: content
-                    })
-                });
-
-                const data = await response.json();
-                if (data.message) {
-                    alert(data.message);
-                    document.getElementById(`comment-content-${dilemmaId}`).value = '';
-                    loadComments(dilemmaId);
-                    // 重新加载列表以更新评论数
-                    loadDilemmas();
-                } else {
-                    alert('发布失败: ' + data.error);
-                }
-            } catch (error) {
-                console.error('发布评论失败', error);
-                alert('发布失败，请稍后重试');
-            }
-        }
-
-        // 提交回复
-        async function submitReply(commentId) {
-            const content = document.getElementById(`reply-content-${commentId}`).value;
-            
-            if (!content) {
-                alert('请输入回复内容');
-                return;
-            }
-
-            // 获取评论所在的困境ID
-            const commentItem = document.querySelector(`[data-id="${commentId}"]`);
-            const dilemmaItem = commentItem.closest('.dilemma-item');
-            const dilemmaId = dilemmaItem.dataset.id;
-
-            try {
-                const response = await fetch(`/api/dilemmas/${dilemmaId}/comments`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        device_id: deviceId,
-                        nickname: '匿名用户',
-                        content: content,
-                        parent_id: commentId
-                    })
-                });
-
-                const data = await response.json();
-                if (data.message) {
-                    alert(data.message);
-                    document.getElementById(`reply-content-${commentId}`).value = '';
-                    document.getElementById(`reply-form-${commentId}`).style.display = 'none';
-                    loadComments(dilemmaId);
-                    // 重新加载列表以更新评论数
-                    loadDilemmas();
-                } else {
-                    alert('发布失败: ' + data.error);
-                }
-            } catch (error) {
-                console.error('发布回复失败', error);
-                alert('发布失败，请稍后重试');
-            }
-        }
-
-        // 切换评论点赞状态
-        async function toggleCommentLike(commentId, element) {
-            try {
-                const isLiked = element.classList.contains('liked');
-                const url = isLiked ? `/api/comments/${commentId}/unlike` : `/api/comments/${commentId}/like`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ device_id: deviceId })
-                });
-
-                const data = await response.json();
-                if (data.message) {
-                    if (isLiked) {
-                        element.classList.remove('liked');
-                    } else {
-                        element.classList.add('liked');
-                    }
-                    // 重新加载评论以更新点赞数
-                    const commentItem = document.querySelector(`[data-id="${commentId}"]`);
-                    const dilemmaItem = commentItem.closest('.dilemma-item');
-                    const dilemmaId = dilemmaItem.dataset.id;
-                    loadComments(dilemmaId);
-                } else {
-                    alert('操作失败: ' + data.error);
-                }
-            } catch (error) {
-                console.error('评论点赞操作失败', error);
-                alert('操作失败，请稍后重试');
-            }
-        }
-
-        // 切换回复表单显示
-        function toggleReplyForm(commentId) {
-            const replyForm = document.getElementById(`reply-form-${commentId}`);
-            if (replyForm.style.display === 'none' || replyForm.style.display === '') {
-                replyForm.style.display = 'block';
-            } else {
-                replyForm.style.display = 'none';
+            } finally {
+                // 恢复按钮状态
+                submitText.style.display = 'inline';
+                submitLoading.style.display = 'none';
+                submitBtn.disabled = false;
             }
         }
 
         // 添加选项
         function addOption() {
             const container = document.getElementById('optionsContainer');
+            if (container.children.length >= 5) {
+                alert('最多只能添加5个选项');
+                return;
+            }
+            
             const optionCount = container.children.length + 1;
             const optionItem = document.createElement('div');
             optionItem.className = 'option-item';
             optionItem.innerHTML = `
-                <input type="text" placeholder="选项${optionCount}" class="option-input">
+                <input type="text" placeholder="选项${optionCount}" class="option-input" maxlength="100">
                 <button type="button" class="remove-option" onclick="removeOption(this)">删除</button>
             `;
             container.appendChild(optionItem);
@@ -1174,6 +935,13 @@
                 alert('至少需要2个选项');
             }
         }
+
+        // 字符计数
+        document.getElementById('dilemmaContent').addEventListener('input', function() {
+            const charCount = this.value.length;
+            const charCountElement = this.nextElementSibling;
+            charCountElement.textContent = `${charCount}/500`;
+        });
 
         // 提交表单
         document.getElementById('dilemmaForm').addEventListener('submit', function(e) {

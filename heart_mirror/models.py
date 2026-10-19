@@ -76,9 +76,17 @@ def get_user_by_account(account_number):
     """根据账号数字获取用户"""
     return db_service.get_user_by_account(account_number)
 
-def create_user(account_number, device_id):
+def create_user(account_number, device_id, admin_level=0):
     """创建新用户"""
-    return db_service.create_user(account_number, device_id)
+    return db_service.create_user(account_number, device_id, admin_level)
+
+def set_admin_level(account_number, admin_level):
+    """设置用户的管理员级别"""
+    return db_service.set_admin_level(account_number, admin_level)
+
+def get_user_admin_level(account_number):
+    """获取用户的管理员级别"""
+    return db_service.get_user_admin_level(account_number)
 
 def update_user_device_id(user_id, device_id):
     """更新用户设备ID"""
@@ -149,13 +157,13 @@ def update_batch_total_amount(batch_id):
     """更新批次总金额"""
     db_service.update_batch_total_amount(batch_id)
 
-def add_time_capsule(device_id, title, scores_json, mood_tags, email):
+def add_time_capsule(device_id, title, scores_json, mood_tags, email, user_id=None):
     """添加时间胶囊"""
-    return db_service.add_time_capsule(device_id, title, scores_json, mood_tags, email)
+    return db_service.add_time_capsule(device_id, title, scores_json, mood_tags, email, user_id)
 
-def get_time_capsules(device_id):
+def get_time_capsules(device_id=None, user_id=None):
     """获取用户的时间胶囊"""
-    capsules = db_service.get_time_capsules(device_id)
+    capsules = db_service.get_time_capsules(device_id, user_id)
     for capsule in capsules:
         capsule['reminder_date'] = capsule.get('reminder_date', None)
     return capsules

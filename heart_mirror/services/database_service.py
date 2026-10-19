@@ -70,6 +70,11 @@ class DatabaseService:
             c.execute('ALTER TABLE users ADD COLUMN device_id TEXT')
         except sqlite3.OperationalError:
             pass  # 列已存在
+        # 为users表添加admin_level列（如果不存在）
+        try:
+            c.execute('ALTER TABLE users ADD COLUMN admin_level INTEGER DEFAULT 0')
+        except sqlite3.OperationalError:
+            pass  # 列已存在
         
         # 测试历史表
         c.execute('''
@@ -98,6 +103,7 @@ class DatabaseService:
             CREATE TABLE IF NOT EXISTS time_capsules (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 device_id TEXT,
+                user_id INTEGER,
                 title TEXT,
                 scores_json TEXT,
                 mood_tags TEXT,
@@ -105,6 +111,12 @@ class DatabaseService:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        
+        # 为time_capsules表添加user_id列（如果不存在）
+        try:
+            c.execute('ALTER TABLE time_capsules ADD COLUMN user_id INTEGER')
+        except sqlite3.OperationalError:
+            pass  # 列已存在
         
         # 道德困惑表
         c.execute('''
@@ -482,19 +494,41 @@ class DatabaseService:
             }
         return None
     
-    def create_user(self, account_number, device_id):
+    def create_user(self, account_number, device_id, admin_level=0):
         """创建新用户"""
         conn = self._get_connection()
         c = conn.cursor()
         try:
-            c.execute('INSERT INTO users (account_number, device_id, username, email, password_hash) VALUES (?, ?, ?, ?, ?)', 
-                      (account_number, device_id, account_number, f'{account_number}@example.com', ''))
+            c.execute('INSERT INTO users (account_number, device_id, username, email, password_hash, admin_level) VALUES (?, ?, ?, ?, ?, ?)', 
+                      (account_number, device_id, account_number, f'{account_number}@example.com', '', admin_level))
             user_id = c.lastrowid
             conn.commit()
             return user_id
         except sqlite3.IntegrityError:
             # 账号已存在
             return None
+        finally:
+            conn.close()
+    
+    def set_admin_level(self, account_number, admin_level):
+        """设置用户的管理员级别"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        try:
+            c.execute('UPDATE users SET admin_level = ? WHERE account_number = ?', (admin_level, account_number))
+            conn.commit()
+            return c.rowcount > 0
+        finally:
+            conn.close()
+    
+    def get_user_admin_level(self, account_number):
+        """获取用户的管理员级别"""
+        conn = self._get_connection()
+        c = conn.cursor()
+        try:
+            c.execute('SELECT admin_level FROM users WHERE account_number = ?', (account_number,))
+            row = c.fetchone()
+            return row[0] if row else 0
         finally:
             conn.close()
     
@@ -671,22 +705,31 @@ class DatabaseService:
         conn.commit()
         conn.close()
     
-    def add_time_capsule(self, device_id, title, scores_json, mood_tags, email):
+    def add_time_capsule(self, device_id, title, scores_json, mood_tags, email, user_id=None):
         """添加时间胶囊"""
         conn = self._get_connection()
         c = conn.cursor()
-        c.execute('INSERT INTO time_capsules (device_id, title, scores_json, mood_tags, email) VALUES (?, ?, ?, ?, ?)',
-                  (device_id, title, scores_json, mood_tags, email))
+        if user_id:
+            c.execute('INSERT INTO time_capsules (device_id, user_id, title, scores_json, mood_tags, email) VALUES (?, ?, ?, ?, ?, ?)',
+                      (device_id, user_id, title, scores_json, mood_tags, email))
+        else:
+            c.execute('INSERT INTO time_capsules (device_id, title, scores_json, mood_tags, email) VALUES (?, ?, ?, ?, ?)',
+                      (device_id, title, scores_json, mood_tags, email))
         capsule_id = c.lastrowid
         conn.commit()
         conn.close()
         return capsule_id
     
-    def get_time_capsules(self, device_id):
+    def get_time_capsules(self, device_id=None, user_id=None):
         """获取时间胶囊列表"""
         conn = self._get_connection()
         c = conn.cursor()
-        c.execute('SELECT id, title, scores_json, mood_tags, email, created_at FROM time_capsules WHERE device_id = ? ORDER BY created_at DESC', (device_id,))
+        if user_id:
+            c.execute('SELECT id, title, scores_json, mood_tags, email, created_at FROM time_capsules WHERE user_id = ? ORDER BY created_at DESC', (user_id,))
+        elif device_id:
+            c.execute('SELECT id, title, scores_json, mood_tags, email, created_at FROM time_capsules WHERE device_id = ? ORDER BY created_at DESC', (device_id,))
+        else:
+            c.execute('SELECT id, title, scores_json, mood_tags, email, created_at FROM time_capsules ORDER BY created_at DESC')
         rows = c.fetchall()
         conn.close()
         
@@ -713,8 +756,8 @@ class DatabaseService:
         c = conn.cursor()
         # 初始化投票数组
         votes = json.dumps([0] * len(options))
-        c.execute('INSERT INTO moral_dilemmas (device_id, title, content, description, background, options, category, is_anonymous, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                  (device_id, title, content, description, background, json.dumps(options), category, is_anonymous, votes))
+        c.execute('INSERT INTO moral_dilemmas (device_id, content, options, is_anonymous, votes) VALUES (?, ?, ?, ?, ?)',
+                  (device_id, content, json.dumps(options), is_anonymous, votes))
         dilemma_id = c.lastrowid
         c.execute('UPDATE stats SET dilemma_posts = dilemma_posts + 1 WHERE id = 1')
         conn.commit()
@@ -727,21 +770,12 @@ class DatabaseService:
         c = conn.cursor()
         
         # 构建查询语句
-        query = 'SELECT id, device_id, title, content, description, background, options, is_anonymous, votes, views, likes, category, comment_count, created_at FROM moral_dilemmas'
+        query = 'SELECT id, device_id, content, options, is_anonymous, votes, created_at FROM moral_dilemmas'
         params = []
-        
-        # 添加类别筛选
-        if category:
-            query += ' WHERE category = ?'
-            params.append(category)
         
         # 添加排序
         if sort_by == 'latest':
             query += ' ORDER BY created_at DESC'
-        elif sort_by == 'most_discussed':
-            query += ' ORDER BY comment_count DESC, created_at DESC'
-        elif sort_by == 'most_liked':
-            query += ' ORDER BY likes DESC, created_at DESC'
         else:
             query += ' ORDER BY created_at DESC'
         
@@ -752,51 +786,44 @@ class DatabaseService:
         return [{
             'id': row[0],
             'device_id': row[1],
-            'title': row[2],
-            'content': row[3],
-            'description': row[4],
-            'background': row[5],
-            'options': json.loads(row[6]),
-            'is_anonymous': row[7],
-            'votes': json.loads(row[8]),
-            'views': row[9],
-            'likes': row[10],
-            'category': row[11],
-            'comment_count': row[12],
-            'created_at': row[13]
+            'title': row[2][:50] + ('...' if len(row[2]) > 50 else ''),
+            'content': row[2],
+            'description': '',
+            'background': '',
+            'options': json.loads(row[3]),
+            'is_anonymous': row[4],
+            'votes': json.loads(row[5]),
+            'views': 0,
+            'likes': 0,
+            'category': '其他',
+            'comment_count': 0,
+            'created_at': row[6]
         } for row in rows]
     
     def get_moral_dilemma_by_id(self, dilemma_id):
         """根据ID获取道德困惑"""
         conn = self._get_connection()
         c = conn.cursor()
-        c.execute('SELECT id, device_id, title, content, description, background, options, is_anonymous, votes, views, likes, category, comment_count, created_at FROM moral_dilemmas WHERE id = ?', (dilemma_id,))
+        c.execute('SELECT id, device_id, content, options, is_anonymous, votes, created_at FROM moral_dilemmas WHERE id = ?', (dilemma_id,))
         row = c.fetchone()
         conn.close()
         
         if row:
-            # 增加浏览量
-            conn = self._get_connection()
-            c = conn.cursor()
-            c.execute('UPDATE moral_dilemmas SET views = views + 1 WHERE id = ?', (dilemma_id,))
-            conn.commit()
-            conn.close()
-            
             return {
                 'id': row[0],
                 'device_id': row[1],
-                'title': row[2],
-                'content': row[3],
-                'description': row[4],
-                'background': row[5],
-                'options': json.loads(row[6]),
-                'is_anonymous': row[7],
-                'votes': json.loads(row[8]),
-                'views': row[9] + 1,  # 实时更新浏览量
-                'likes': row[10],
-                'category': row[11],
-                'comment_count': row[12],
-                'created_at': row[13]
+                'title': row[2][:50] + ('...' if len(row[2]) > 50 else ''),
+                'content': row[2],
+                'description': '',
+                'background': '',
+                'options': json.loads(row[3]),
+                'is_anonymous': row[4],
+                'votes': json.loads(row[5]),
+                'views': 0,
+                'likes': 0,
+                'category': '其他',
+                'comment_count': 0,
+                'created_at': row[6]
             }
         return None
     
@@ -805,12 +832,14 @@ class DatabaseService:
         conn = self._get_connection()
         c = conn.cursor()
         c.execute('SELECT votes FROM moral_dilemmas WHERE id = ?', (dilemma_id,))
-        votes_str = c.fetchone()[0]
-        votes = json.loads(votes_str)
-        if 0 <= option_index < len(votes):
-            votes[option_index] += 1
-            c.execute('UPDATE moral_dilemmas SET votes = ? WHERE id = ?', (json.dumps(votes), dilemma_id))
-            conn.commit()
+        result = c.fetchone()
+        if result:
+            votes_str = result[0]
+            votes = json.loads(votes_str)
+            if 0 <= option_index < len(votes):
+                votes[option_index] += 1
+                c.execute('UPDATE moral_dilemmas SET votes = ? WHERE id = ?', (json.dumps(votes), dilemma_id))
+                conn.commit()
         conn.close()
     
     def delete_moral_dilemma(self, dilemma_id):

@@ -51,20 +51,23 @@ def create_time_capsule():
     scores_json = json.dumps(data.get('scores', []))
     mood_tags = json.dumps(data.get('mood_tags', []))
     email = data.get('email')
+    user_id = data.get('user_id')
     
     if not device_id or not title or not email:
         return jsonify({'error': 'device_id, title, and email are required'}), 400
     
-    capsule_id = add_time_capsule(device_id, title, scores_json, mood_tags, email)
+    capsule_id = add_time_capsule(device_id, title, scores_json, mood_tags, email, user_id)
     return jsonify({'message': '时间胶囊创建成功', 'id': capsule_id}), 201
 
 @app.route('/api/time_capsules', methods=['GET'])
 def get_user_time_capsules():
     device_id = request.args.get('device_id')
-    if not device_id:
-        return jsonify({'error': 'device_id is required'}), 400
+    user_id = request.args.get('user_id')
     
-    capsules = get_time_capsules(device_id)
+    if not device_id and not user_id:
+        return jsonify({'error': 'device_id or user_id is required'}), 400
+    
+    capsules = get_time_capsules(device_id, user_id)
     return jsonify(capsules), 200
 
 @app.route('/api/time_capsules/<int:capsule_id>', methods=['DELETE'])

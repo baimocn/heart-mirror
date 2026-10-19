@@ -139,8 +139,17 @@
 <body>
     <div class="container">
         <header>
-            <h1>📊 心镜数据分析看板</h1>
-            <div class="subtitle">实时监控系统运行状态和用户行为</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>📊 心镜数据分析看板</h1>
+                    <div class="subtitle">实时监控系统运行状态和用户行为</div>
+                </div>
+                <div id="adminInfo" style="text-align: right; background: #f1f5f9; padding: 12px 20px; border-radius: 12px;">
+                    <div id="adminAccount" style="font-weight: 600; margin-bottom: 4px;">管理员账号: <span id="accountNumber">加载中...</span></div>
+                    <div id="adminLevel" style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px;">权限级别: <span id="levelText">加载中...</span></div>
+                    <button id="logoutBtn" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">登出</button>
+                </div>
+            </div>
         </header>
 
         <div class="stats-grid">
@@ -185,10 +194,162 @@
             </div>
         </div>
 
+        <div class="chart-card">
+            <div class="chart-title">测试人员数据管理</div>
+            <div id="testUsersContainer">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>测试人员列表</h3>
+                    <button id="refreshUsersBtn" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">刷新数据</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">ID</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">数字账号</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">设备ID</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">管理员级别</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">创建时间</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">测试次数</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testUsersTableBody">
+                            <tr>
+                                <td colspan="7" style="padding: 20px; text-align: center; color: #64748b;">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-title">受限管理员管理</div>
+            <div id="limitedAdminsContainer">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>受限管理员列表</h3>
+                    <button id="addLimitedAdminBtn" style="padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer;">添加受限管理员</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">ID</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">数字账号</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">设备ID</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">创建时间</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="limitedAdminsTableBody">
+                            <tr>
+                                <td colspan="5" style="padding: 20px; text-align: center; color: #64748b;">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <a href="/" class="back-btn">返回首页</a>
     </div>
 
+    <div id="editUserModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; padding: 30px; width: 90%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 20px;">编辑测试人员</h3>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">数字账号</label>
+                    <input type="text" id="editAccountNumber" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">设备ID</label>
+                    <input type="text" id="editDeviceId" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">管理员级别</label>
+                    <select id="editAdminLevel" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                        <option value="0">普通用户</option>
+                        <option value="1">超级管理员</option>
+                        <option value="2">受限管理员</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" id="cancelEditBtn" style="padding: 10px 20px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer;">取消</button>
+                    <button type="submit" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="addLimitedAdminModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; padding: 30px; width: 90%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 20px;">添加受限管理员</h3>
+            <form id="addLimitedAdminForm">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">数字账号</label>
+                    <input type="text" id="addAccountNumber" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">设备ID</label>
+                    <input type="text" id="addDeviceId" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" id="cancelAddBtn" style="padding: 10px 20px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer;">取消</button>
+                    <button type="submit" style="padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer;">添加</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // 页面加载时检查管理员会话
+        document.addEventListener('DOMContentLoaded', function() {
+            function checkAdminSession() {
+                const adminInfo = localStorage.getItem('admin_info');
+                const adminToken = localStorage.getItem('admin_token');
+                if (!adminInfo || !adminToken) {
+                    alert('请先登录管理员账号');
+                    window.location.href = '/';
+                    return false;
+                }
+                return true;
+            }
+            
+            // 显示管理员信息
+            function displayAdminInfo() {
+                const adminInfo = localStorage.getItem('admin_info');
+                if (adminInfo) {
+                    try {
+                        const info = JSON.parse(adminInfo);
+                        document.getElementById('accountNumber').innerText = info.account_number;
+                        document.getElementById('levelText').innerText = info.admin_level === 1 ? '超级管理员' : '受限管理员';
+                    } catch (e) {
+                        console.error('解析管理员信息失败:', e);
+                    }
+                }
+            }
+            
+            // 立即检查会话并显示信息
+            checkAdminSession();
+            displayAdminInfo();
+            
+            // 登出按钮点击事件
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确定要登出吗？')) {
+                    // 清除管理员信息和令牌
+                    localStorage.removeItem('admin_info');
+                    localStorage.removeItem('admin_token');
+                    // 清除cookie中的令牌
+                    document.cookie = 'admin_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    // 重定向到首页
+                    window.location.href = '/';
+                }
+            });
+        });
+
         // 模拟数据
         const mockData = {
             today_participants: 120,
@@ -312,6 +473,405 @@
                 console.error('获取数据失败:', error);
             });
         */
+
+        // 测试人员数据管理
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查管理员会话是否过期
+            function checkAdminSession() {
+                const adminInfo = localStorage.getItem('admin_info');
+                if (!adminInfo) {
+                    alert('请先登录管理员账号');
+                    window.location.href = '/';
+                    return false;
+                }
+                return true;
+            }
+
+            // 获取测试人员数据
+            function getTestUsers() {
+                if (!checkAdminSession()) return;
+                const token = localStorage.getItem('admin_token');
+                if (!token) {
+                    alert('请先登录管理员账号');
+                    return;
+                }
+
+                fetch('/api/admin/test_users', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('获取数据失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    renderTestUsers(data);
+                })
+                .catch(error => {
+                    console.error('获取测试人员数据失败:', error);
+                    document.getElementById('testUsersTableBody').innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align: center; color: #ef4444;">获取数据失败</td></tr>';
+                });
+            }
+
+            // 检查管理员权限
+            function getAdminLevel() {
+                const adminInfo = localStorage.getItem('admin_info');
+                if (adminInfo) {
+                    try {
+                        const info = JSON.parse(adminInfo);
+                        return info.admin_level;
+                    } catch (e) {
+                        console.error('解析管理员信息失败:', e);
+                        return 0;
+                    }
+                }
+                return 0;
+            }
+
+            // 渲染测试人员数据
+            function renderTestUsers(users) {
+                const tableBody = document.getElementById('testUsersTableBody');
+                if (users.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align: center; color: #64748b;">暂无测试人员数据</td></tr>';
+                    return;
+                }
+
+                const adminLevel = getAdminLevel();
+                tableBody.innerHTML = '';
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    const editButton = adminLevel === 1 ? `
+                        <button class="edit-btn" data-id="${user.id}" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">编辑</button>
+                    ` : '';
+                    row.innerHTML = `
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${user.id}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${user.account_number || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${user.device_id || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${getAdminLevelText(user.admin_level)}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${user.created_at || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${user.test_history ? user.test_history.length : 0}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                            ${editButton}
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                // 绑定编辑按钮事件
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-id');
+                        editUser(userId);
+                    });
+                });
+            }
+
+            // 获取管理员级别文本
+            function getAdminLevelText(level) {
+                switch(level) {
+                    case 0: return '普通用户';
+                    case 1: return '超级管理员';
+                    case 2: return '受限管理员';
+                    default: return '未知';
+                }
+            }
+
+            // 编辑用户
+            function editUser(userId) {
+                if (!checkAdminSession()) return;
+                const token = localStorage.getItem('admin_token');
+                if (!token) {
+                    alert('请先登录管理员账号');
+                    return;
+                }
+
+                fetch('/api/admin/test_users', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const user = data.find(u => u.id == userId);
+                    if (user) {
+                        document.getElementById('editUserId').value = user.id;
+                        document.getElementById('editAccountNumber').value = user.account_number || '';
+                        document.getElementById('editDeviceId').value = user.device_id || '';
+                        document.getElementById('editAdminLevel').value = user.admin_level || 0;
+                        document.getElementById('editUserModal').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('获取用户数据失败:', error);
+                    alert('获取用户数据失败');
+                });
+            }
+
+            // 关闭编辑模态框
+            document.getElementById('cancelEditBtn').addEventListener('click', function() {
+                document.getElementById('editUserModal').style.display = 'none';
+            });
+
+            // 保存编辑
+            document.getElementById('editUserForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (!checkAdminSession()) return;
+                const userId = document.getElementById('editUserId').value;
+                const accountNumber = document.getElementById('editAccountNumber').value;
+                const deviceId = document.getElementById('editDeviceId').value;
+                const adminLevel = document.getElementById('editAdminLevel').value;
+
+                const token = localStorage.getItem('admin_token');
+                if (!token) {
+                    alert('请先登录管理员账号');
+                    return;
+                }
+
+                fetch(`/api/admin/test_users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        account_number: accountNumber,
+                        device_id: deviceId,
+                        admin_level: parseInt(adminLevel)
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('更新失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('更新成功');
+                    document.getElementById('editUserModal').style.display = 'none';
+                    getTestUsers();
+                })
+                .catch(error => {
+                    console.error('更新用户数据失败:', error);
+                    alert('更新失败');
+                });
+            });
+
+            // 刷新按钮
+            document.getElementById('refreshUsersBtn').addEventListener('click', getTestUsers);
+
+            // 初始加载数据
+            getTestUsers();
+        });
+
+        // 受限管理员管理
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查管理员会话是否过期
+            function checkAdminSession() {
+                const adminInfo = localStorage.getItem('admin_info');
+                if (!adminInfo) {
+                    alert('请先登录管理员账号');
+                    window.location.href = '/';
+                    return false;
+                }
+                return true;
+            }
+
+            // 获取受限管理员数据
+            function getLimitedAdmins() {
+                if (!checkAdminSession()) return;
+                const token = localStorage.getItem('admin_token');
+                if (!token) {
+                    alert('请先登录管理员账号');
+                    return;
+                }
+
+                fetch('/api/admin/limited_admins', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('获取数据失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    renderLimitedAdmins(data);
+                })
+                .catch(error => {
+                    console.error('获取受限管理员数据失败:', error);
+                    document.getElementById('limitedAdminsTableBody').innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #ef4444;">获取数据失败</td></tr>';
+                });
+            }
+
+            // 检查管理员权限
+            function getAdminLevel() {
+                const adminInfo = localStorage.getItem('admin_info');
+                if (adminInfo) {
+                    try {
+                        const info = JSON.parse(adminInfo);
+                        return info.admin_level;
+                    } catch (e) {
+                        console.error('解析管理员信息失败:', e);
+                        return 0;
+                    }
+                }
+                return 0;
+            }
+
+            // 渲染受限管理员数据
+            function renderLimitedAdmins(admins) {
+                const tableBody = document.getElementById('limitedAdminsTableBody');
+                if (admins.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #64748b;">暂无受限管理员数据</td></tr>';
+                    return;
+                }
+
+                const adminLevel = getAdminLevel();
+                tableBody.innerHTML = '';
+                admins.forEach(admin => {
+                    const row = document.createElement('tr');
+                    const deleteButton = adminLevel === 1 ? `
+                        <button class="delete-btn" data-id="${admin.id}" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">删除</button>
+                    ` : '';
+                    row.innerHTML = `
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${admin.id}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${admin.account_number || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${admin.device_id || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${admin.created_at || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                            ${deleteButton}
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                // 绑定删除按钮事件
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const adminId = this.getAttribute('data-id');
+                        if (confirm('确定要删除该受限管理员吗？')) {
+                            deleteLimitedAdmin(adminId);
+                        }
+                    });
+                });
+            }
+
+            // 检查并显示添加按钮
+            function checkAddButton() {
+                const adminLevel = getAdminLevel();
+                const addButton = document.getElementById('addLimitedAdminBtn');
+                if (addButton) {
+                    if (adminLevel === 1) {
+                        addButton.style.display = 'block';
+                    } else {
+                        addButton.style.display = 'none';
+                    }
+                }
+            }
+
+            // 删除受限管理员
+            function deleteLimitedAdmin(adminId) {
+                if (!checkAdminSession()) return;
+                const token = localStorage.getItem('admin_token');
+                if (!token) {
+                    alert('请先登录管理员账号');
+                    return;
+                }
+
+                fetch(`/api/admin/limited_admins/${adminId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('删除失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('删除成功');
+                    getLimitedAdmins();
+                })
+                .catch(error => {
+                    console.error('删除受限管理员失败:', error);
+                    alert('删除失败');
+                });
+            }
+
+            // 打开添加受限管理员模态框
+            document.getElementById('addLimitedAdminBtn').addEventListener('click', function() {
+                document.getElementById('addLimitedAdminModal').style.display = 'block';
+            });
+
+            // 关闭添加受限管理员模态框
+            document.getElementById('cancelAddBtn').addEventListener('click', function() {
+                document.getElementById('addLimitedAdminModal').style.display = 'none';
+            });
+
+            // 添加受限管理员
+            document.getElementById('addLimitedAdminForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (!checkAdminSession()) return;
+                const accountNumber = document.getElementById('addAccountNumber').value;
+                const deviceId = document.getElementById('addDeviceId').value;
+
+                if (!accountNumber) {
+                    alert('数字账号不能为空');
+                    return;
+                }
+
+                if (!deviceId) {
+                    alert('设备ID不能为空');
+                    return;
+                }
+
+                const token = localStorage.getItem('admin_token');
+                if (!token) {
+                    alert('请先登录管理员账号');
+                    return;
+                }
+
+                fetch('/api/admin/limited_admins', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        account_number: accountNumber,
+                        device_id: deviceId
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('添加失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('添加成功');
+                    document.getElementById('addLimitedAdminModal').style.display = 'none';
+                    document.getElementById('addAccountNumber').value = '';
+                    document.getElementById('addDeviceId').value = '';
+                    getLimitedAdmins();
+                })
+                .catch(error => {
+                    console.error('添加受限管理员失败:', error);
+                    alert('添加失败');
+                });
+            });
+
+            // 初始加载数据
+            checkAddButton();
+            getLimitedAdmins();
+        });
     </script>
 </body>
 </html>

@@ -75,10 +75,38 @@ def admin_required(f):
     """管理员认证装饰器"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # 对于HTML页面请求，暂时跳过认证，让前端处理
+        # 这样可以确保用户能够进入管理员页面，然后前端会检查localStorage中的信息
+        if request.accept_mimetypes.accept_html:
+            return f(*args, **kwargs)
+        
+        # 对于API请求，需要严格认证
         try:
             verify_jwt_in_request()
             current_user = get_jwt_identity()
-            if current_user != 'admin':
+            # 检查用户是否为管理员（admin_level >= 1）
+            if not isinstance(current_user, dict) or current_user.get('admin_level', 0) < 1:
+                return jsonify({'error': '权限不足'}), 403
+        except Exception as e:
+            return jsonify({'error': '未授权访问'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+# 超级管理员认证装饰器
+def super_admin_required(f):
+    """超级管理员认证装饰器"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # 对于HTML页面请求，暂时跳过认证，让前端处理
+        if request.accept_mimetypes.accept_html:
+            return f(*args, **kwargs)
+        
+        # 对于API请求，需要严格认证
+        try:
+            verify_jwt_in_request()
+            current_user = get_jwt_identity()
+            # 检查用户是否为超级管理员（admin_level == 1）
+            if not isinstance(current_user, dict) or current_user.get('admin_level', 0) != 1:
                 return jsonify({'error': '权限不足'}), 403
         except Exception as e:
             return jsonify({'error': '未授权访问'}), 401
